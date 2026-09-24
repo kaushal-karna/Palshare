@@ -1,0 +1,18 @@
+# Environment variables / secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# SQLite development database
+db.sqlite3
+
+# User uploaded files
+media/
+
+# IDE
+.vscode/

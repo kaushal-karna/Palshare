@@ -1,0 +1,92 @@
+{% extends "palshare/base.html" %}
+{% block title %}{{ profile.name }}{% endblock %}
+
+{% comment %}
+  Features 6 and 8. The private-profile rule lives here and is the one piece of
+  UI logic on this page: if the profile is private and you are not following it
+  and it is not yours, you get the header and nothing else.
+
+  Reads: profile.{username,name,avatar,bio,followers,following,post_count,joined,
+                  is_following,is_private,is_me}, posts (list)
+{% endcomment %}
+
+{% block nav %}{% with active="profile" %}{% include "palshare/partials/_nav.html" %}{% endwith %}{% endblock %}
+
+{% block content %}
+  <header class="card profile-head">
+    <div class="avatar avatar-lg">{% include "palshare/partials/_avatar.html" with who=profile %}</div>
+
+    <div class="profile-id">
+      <h1 class="profile-name">
+        {{ profile.name }}
+        {% if profile.is_private %}<span class="chip">Private</span>{% endif %}
+      </h1>
+      <p class="post-meta">@{{ profile.username }} · joined {{ profile.joined }}</p>
+      {% if profile.bio %}<p class="profile-bio">{{ profile.bio }}</p>{% endif %}
+
+      <p class="profile-stats">
+        <span><strong>{{ profile.post_count }}</strong> posts</span>
+        {% comment %}
+          Both of these used to point at the same bare URL, and `connections`
+          defaults to the followers tab — so "following" always showed you
+          followers and the number never matched the list.
+        {% endcomment %}
+        <a href="{% url 'palshare:connections' profile.username %}?tab=followers"><strong>{{ profile.followers }}</strong> followers</a>
+        <a href="{% url 'palshare:connections' profile.username %}?tab=following"><strong>{{ profile.following }}</strong> following</a>
+      </p>
+    </div>
+
+    <div class="profile-actions">
+      {% if profile.is_me %}
+        <a class="btn btn-quiet" href="{% url 'palshare:profile-edit' profile.username %}">Edit profile</a>
+      {% else %}
+        <form method="post" action="{% url 'palshare:user-follow' profile.username %}">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="btn {% if profile.is_following %}btn-quiet{% else %}btn-primary{% endif %}"
+                  type="submit">
+            {% if profile.is_following %}Following{% else %}Follow{% endif %}
+          </button>
+        </form>
+        {% comment %}
+          A POST, not a link: opening a conversation creates a row the first
+          time, and a GET that writes is a GET any crawler can trigger.
+        {% endcomment %}
+        <form method="post" action="{% url 'palshare:message-user' profile.username %}">
+          {% csrf_token %}
+          <button class="btn btn-quiet" type="submit">Message</button>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if profile.is_private and not profile.is_following and not profile.is_me %}
+    {% include "palshare/partials/_empty.html" with empty_title="This account is private" empty_text="Follow to see their posts." %}
+  {% else %}
+    {% comment %}
+      `tab` comes from the view now. All three used to be hardcoded with Posts
+      always active, so the other two changed the URL and nothing else.
+    {% endcomment %}
+    <div class="tabs">
+      <a class="tab {% if tab == 'posts' %}tab-active{% endif %}" href="?tab=posts">Posts</a>
+      <a class="tab {% if tab == 'media' %}tab-active{% endif %}" href="?tab=media">Media</a>
+      <a class="tab {% if tab == 'likes' %}tab-active{% endif %}" href="?tab=likes">Likes</a>
+    </div>
+
+    {% if posts %}
+      <div class="post-list">
+        {% for post in posts %}
+          {% include "palshare/partials/_post_card.html" %}
+        {% endfor %}
+      </div>
+      {% include "palshare/partials/_pagination.html" %}
+    {% else %}
+      {% if tab == "media" %}
+        {% include "palshare/partials/_empty.html" with empty_title="No photos or video yet" %}
+      {% elif tab == "likes" %}
+        {% include "palshare/partials/_empty.html" with empty_title="No liked posts yet" %}
+      {% else %}
+        {% include "palshare/partials/_empty.html" with empty_title="No posts yet" %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endblock %}
