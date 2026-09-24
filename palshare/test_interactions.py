@@ -6,13 +6,25 @@ most in here is the toggle pair — press once, press again, and end up where
 you started, with the counter cache still telling the truth.
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import (Comment, CommentLike, Conversation, Follow, Like, Post,
-                     Profile, Save, Share)
+from accounts.models import Profile
+from .models import (
+    Comment,
+    CommentLike,
+    Conversation,
+    Follow,
+    Like,
+    Post,
+    Save,
+    Share
+    )
 from .services import set_like
+
+User = get_user_model()
 
 PASSWORD = "lab-passphrase-2026"
 
@@ -21,8 +33,8 @@ class InteractionTestCase(TestCase):
     def setUp(self):
         self.asha = User.objects.create_user("asha", password=PASSWORD, first_name="Asha")
         self.bello = User.objects.create_user("bello", password=PASSWORD, first_name="Bello")
-        Profile.objects.create(user=self.asha)
-        Profile.objects.create(user=self.bello)
+        self.asha_profile = Profile.objects.get(user=self.asha)
+        self.bello_profile = Profile.objects.get(user=self.bello)
         self.post = Post.objects.create(author=self.asha, text="press things on me")
         self.comment = Comment.objects.create(post=self.post, author=self.asha, text="a comment")
         self.client.login(username="bello", password=PASSWORD)

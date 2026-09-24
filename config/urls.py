@@ -16,10 +16,17 @@ urlpatterns = [
 
     # Main Palshare application
     path("", include("palshare.urls")),
+    path(
+    "palshare/",
+    include(
+        ("palshare.urls", "palshare_legacy"),
+        namespace="palshare_legacy",
+    ),
+),
 
     # API
     path(
-        "api/",
+        "api/palshare/",
         include("palshare.api_urls"),
     ),
 

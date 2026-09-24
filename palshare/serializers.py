@@ -9,7 +9,8 @@ API cannot drift apart.
 `demo.py` is the contract these match. Read the two side by side.
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.template.defaultfilters import date as date_filter
@@ -20,6 +21,7 @@ from rest_framework import serializers
 from .models import Comment, Media, Message, Post
 from .services import attach_media, reaction_summary
 
+User = get_user_model()
 
 def initial(user):
     """The one-letter avatar every card and row renders.
@@ -108,8 +110,7 @@ class PersonSerializer(PersonRowSerializer):
     followers = serializers.IntegerField(source="followers.count", read_only=True)
     following = serializers.IntegerField(source="following.count", read_only=True)
     post_count = serializers.IntegerField(source="posts.count", read_only=True)
-    is_private = serializers.BooleanField(source="profile.is_private", read_only=True,
-                                          default=False)
+    is_private = serializers.BooleanField(read_only=True, default=False)
     is_me = serializers.SerializerMethodField()
     joined = serializers.SerializerMethodField()
 

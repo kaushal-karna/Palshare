@@ -16,7 +16,8 @@ import shutil
 import tempfile
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
@@ -28,6 +29,7 @@ from .models import Media, Post
 from .services import attach_media
 from .validators import MAX_BYTES, MAX_FILES, kind_for, validate_uploads
 
+User = get_user_model()
 
 # Uploads in tests are real files on a real disk. A temporary MEDIA_ROOT keeps
 # them out of the developer's working copy and lets the class delete the lot.

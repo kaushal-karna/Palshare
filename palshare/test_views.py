@@ -5,13 +5,17 @@ correct when its context has the same shape the shell was built against, which
 is why several of these assert on rendered markup rather than on a queryset.
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Comment, Conversation, Follow, Like, Post, Profile, Save
+from accounts.models import Profile
+from .models import Comment, Conversation, Follow, Like, Post, Save
+
+User = get_user_model()
 
 PASSWORD = "lab-passphrase-2026"
 
@@ -22,8 +26,10 @@ class PalShareTestCase(TestCase):
     def setUp(self):
         self.asha = User.objects.create_user("asha", password=PASSWORD, first_name="Asha")
         self.bello = User.objects.create_user("bello", password=PASSWORD, first_name="Bello")
-        Profile.objects.create(user=self.asha, bio="workshop")
-        Profile.objects.create(user=self.bello)
+        self.asha_profile = Profile.objects.get(user=self.asha)
+        self.asha_profile.bio = "workshop"
+        self.asha_profile.save(update_fields=["bio"])
+        self.bello_profile = Profile.objects.get(user=self.bello)
         self.public = Post.objects.create(author=self.asha, text="a public post")
         self.private = Post.objects.create(author=self.asha, text="a followers-only post",
                                            followers_only=True)
@@ -56,7 +62,7 @@ class PageTests(PalShareTestCase):
     def test_pages_require_a_login_and_send_you_to_palshares_own(self):
         self.client.logout()
         response = self.client.get(reverse("palshare:feed"))
-        self.assertRedirects(response, "/palshare/login/?next=/palshare/")
+        self.assertRedirects(response, f"{reverse('palshare:login')}?next=/",)
 
     def test_feed_shows_real_rows_not_demo_data(self):
         response = self.client.get(reverse("palshare:feed"))
@@ -92,13 +98,15 @@ class VisibilityTests(PalShareTestCase):
         self.assertEqual(response.context["people"], [])
 
     def test_private_profile_shows_the_header_and_nothing_else(self):
-        Profile.objects.filter(user=self.asha).update(is_private=True)
+        self.asha.is_private = True
+        self.asha.save(update_fields=["is_private"])
         response = self.client.get(reverse("palshare:profile", args=["asha"]))
         self.assertContains(response, "This account is private")
         self.assertNotContains(response, "a public post")
 
     def test_private_profile_opens_up_to_a_follower(self):
-        Profile.objects.filter(user=self.asha).update(is_private=True)
+        self.asha.is_private = True
+        self.asha.save(update_fields=["is_private"])
         Follow.objects.create(follower=self.bello, following=self.asha)
         response = self.client.get(reverse("palshare:profile", args=["asha"]))
         self.assertContains(response, "a public post")
@@ -149,9 +157,11 @@ class WriteTests(PalShareTestCase):
 
     def test_the_privacy_switch_saves(self):
         self.client.post(reverse("palshare:settings"), {"is_private": "on"})
-        self.assertTrue(Profile.objects.get(user=self.bello).is_private)
+        self.bello.refresh_from_db()
+        self.assertTrue(self.bello.is_private)
         self.client.post(reverse("palshare:settings"), {})
-        self.assertFalse(Profile.objects.get(user=self.bello).is_private)
+        self.bello.refresh_from_db()
+        self.assertFalse(self.bello.is_private)
 
 
 class MessagingTests(PalShareTestCase):
@@ -210,9 +220,13 @@ class AuthTests(TestCase):
         self.assertContains(response, "did not match")
 
     def test_logout_is_a_post(self):
-        user = User.objects.create_user("kaushal", password=PASSWORD)
-        Profile.objects.create(user=user)
-        self.client.login(username="kaushal", password=PASSWORD)
+        user = User.objects.create_user(
+            username="kaushal",
+            email="k@lab.test",
+            password=PASSWORD,
+        )
+        #The signal automatically creates the profile.
+        self.client.force_login(user)
         # A GET logout can be triggered by any <img> tag on the internet.
         self.assertEqual(self.client.get(reverse("palshare:settings")).status_code, 200)
         response = self.client.post(reverse("palshare:settings"), {"logout": "1"})
@@ -254,10 +268,23 @@ class QueryCountTests(PalShareTestCase):
             return len(queries)
 
         for i in range(2):
-            Profile.objects.create(
-                user=User.objects.create_user(f"early{i}", first_name="Findme"), bio="hello")
+            user = User.objects.create_user(
+                f"early{i}",
+                first_name="Findme",
+            )
+            profile = Profile.objects.get(user=user)
+            profile.bio = "hello"
+            profile.save(update_fields=["bio"])
+
         two_people = cost()
+
         for i in range(10):
-            Profile.objects.create(
-                user=User.objects.create_user(f"later{i}", first_name="Findme"), bio="hello")
+            user = User.objects.create_user(
+                f"later{i}",
+                first_name="Findme",
+            )
+            profile = Profile.objects.get(user=user)
+            profile.bio = "hello"
+            profile.save(update_fields=["bio"])
+
         self.assertEqual(cost(), two_people)

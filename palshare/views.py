@@ -15,7 +15,8 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
@@ -28,7 +29,10 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST, require_http_methods
 
 from .integrations import ask_assistant, current_weather
-from .models import Comment, Conversation, Follow, Message, Post, Profile, Reaction
+
+from accounts.models import Profile
+
+from .models import Comment, Conversation, Follow, Message, Post, Reaction
 from .services import (
     add_comment,
     attach_media,
@@ -62,6 +66,8 @@ from .serializers import (
     display_name,
     initial,
 )
+
+User = get_user_model()
 
 PAGE_SIZE = 20
 
@@ -162,7 +168,7 @@ def register_view(request):
             error = "That username is taken."
         else:
             user = User.objects.create_user(username, email=email, password=password)
-            Profile.objects.create(user=user)
+            # Profile is automatically created by accounts.signals
             auth_login(request, user)
             return redirect("palshare:feed")
     return render(request, "palshare/register.html", {"error": error})
@@ -620,15 +626,15 @@ def message_user(request, username):
 @signed_in
 @require_http_methods(["GET", "POST"])
 def settings_view(request):
-    profile = profile_of(request.user)
+    user = request.user
     if request.method == "POST":
         if "logout" in request.POST:
             # Logout is a POST for a reason: a GET logout can be triggered by
             # any <img> tag on any page on the internet.
             auth_logout(request)
             return redirect("palshare:login")
-        profile.is_private = bool(request.POST.get("is_private"))
-        profile.save(update_fields=["is_private"])
+        user.is_private = bool(request.POST.get("is_private"))
+        user.save(update_fields=["is_private"])
         messages.success(request, "Settings saved.")
         return redirect("palshare:settings")
     return render(request, "palshare/settings.html", shell(

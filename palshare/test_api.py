@@ -6,11 +6,14 @@ somebody else's row, idempotent likes and follows, and a query count that does
 not grow with the number of rows.
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from rest_framework.test import APIClient, APITestCase
 
-from .models import Follow, Like, Post, Profile, Save
+from accounts.models import Profile
+from .models import Follow, Like, Post, Save
+
+User = get_user_model()
 
 PASSWORD = "lab-passphrase-2026"
 
@@ -19,8 +22,8 @@ class ApiTestCase(APITestCase):
     def setUp(self):
         self.asha = User.objects.create_user("asha", password=PASSWORD, first_name="Asha")
         self.bello = User.objects.create_user("bello", password=PASSWORD, first_name="Bello")
-        Profile.objects.create(user=self.asha)
-        Profile.objects.create(user=self.bello)
+        self.asha_profile = Profile.objects.get(user=self.asha)
+        self.bello_profile = Profile.objects.get(user=self.bello)
         self.client.force_authenticate(user=self.asha)
 
 

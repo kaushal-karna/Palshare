@@ -11,15 +11,19 @@ import shutil
 import tempfile
 from unittest.mock import patch
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from .models import Conversation, Follow, Like, Message, Post, Profile, Reaction
+from accounts.models import Profile
+from .models import Conversation, Follow, Like, Message, Post, Reaction
 from .services import edit_message, set_avatar, set_reaction, unsend_message
+
+User = get_user_model()
 
 MEDIA_ROOT = tempfile.mkdtemp(prefix="palshare-social-media-")
 
@@ -27,15 +31,29 @@ MEDIA_ROOT = tempfile.mkdtemp(prefix="palshare-social-media-")
 def an_image(name="face.png"):
     return SimpleUploadedFile(name, b"x" * 16, content_type="image/png")
 
-
 class SocialTestCase(TestCase):
     def setUp(self):
-        self.me = User.objects.create_user("bello", password="pw", first_name="Bello",
-                                           last_name="Ferrante")
-        self.other = User.objects.create_user("asha", password="pw", first_name="Asha",
-                                              last_name="Kandel")
-        Profile.objects.create(user=self.me)
-        Profile.objects.create(user=self.other, bio="Ships things on Fridays")
+        self.me = User.objects.create_user(
+            username="bello",
+            email="bello@example.com",
+            password="testpassword123",
+            first_name="Bello",
+        )
+
+        self.other = User.objects.create_user(
+            username="asha",
+            email="asha@example.com",
+            password="testpassword123",
+            first_name="Asha",
+        )
+
+        # Profile is automatically created by accounts.signals
+        self.me_profile = Profile.objects.get(user=self.me)
+        self.other_profile = Profile.objects.get(user=self.other)
+
+        self.other_profile.bio = "Ships things on Fridays"
+        self.other_profile.save(update_fields=["bio"])
+
         self.client.force_login(self.me)
 
 
@@ -116,8 +134,8 @@ class ProfileAccessTests(SocialTestCase):
         self.assertEqual(response.context["tab"], "posts")
 
     def test_a_private_account_still_hides_its_posts_on_every_tab(self):
-        self.other.profile.is_private = True
-        self.other.profile.save()
+        self.other.is_private = True
+        self.other.save()
         Post.objects.create(author=self.other, text="secret")
 
         for tab in ("posts", "media", "likes"):
@@ -439,7 +457,8 @@ class SearchTests(SocialTestCase):
         the right rail suggests the same person, and that is not a duplicate."""
         body = self.find("asha")
         section = body[body.index(">People<"):body.index(">Posts<")]
-        self.assertEqual(section.count('href="/palshare/u/asha/"'), 2)  # avatar + name
+        profile_url = reverse("palshare:profile", args=["asha"])
+        self.assertEqual(section.count(f'href="{profile_url}"'), 2)  # avatar + name
 
     def test_posts_are_found_too(self):
         Post.objects.create(author=self.other, text="a post about migrations")

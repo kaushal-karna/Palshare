@@ -10,10 +10,13 @@ arguments, which is what lets the API view and the page view call the same
 function instead of each growing its own copy of the rule.
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.db.models import Exists, OuterRef, Q
 
 from .models import Comment, CommentLike, Conversation, Follow, Like, Post, Save, Share
+
+User = get_user_model()
 
 
 def visible_posts(user):
@@ -54,7 +57,7 @@ def may_see_posts(viewer, owner):
     """A private account shows its posts to itself and its followers, nobody else."""
     if viewer == owner:
         return True
-    if not owner.profile.is_private:
+    if not owner.is_private:
         return True
     return Follow.objects.filter(follower=viewer, following=owner).exists()
 
