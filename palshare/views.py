@@ -31,6 +31,7 @@ from django.views.decorators.http import require_POST, require_http_methods
 from .integrations import ask_assistant, current_weather
 
 from accounts.models import Profile
+from accounts.services import set_avatar
 
 from accounts.serializers import (
     PersonRowSerializer,
@@ -42,7 +43,6 @@ from .services import (
     add_comment,
     attach_media,
     edit_message,
-    set_avatar,
     set_reaction,
     unsend_message,
     conversation_with,

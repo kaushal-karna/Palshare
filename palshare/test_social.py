@@ -21,7 +21,9 @@ from rest_framework.test import APIClient
 
 from accounts.models import Profile
 from .models import Conversation, Follow, Like, Message, Post, Reaction
-from .services import edit_message, set_avatar, set_reaction, unsend_message
+from accounts.services import set_avatar
+
+from .services import edit_message, set_reaction, unsend_message
 
 User = get_user_model()
 
