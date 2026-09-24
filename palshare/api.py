@@ -14,7 +14,8 @@ from rest_framework.response import Response
 from .models import Post
 from .permissions import IsAuthorOrReadOnly
 from .queries import people, visible_posts
-from .serializers import PersonSerializer, PostSerializer
+from accounts.serializers import PersonSerializer
+from .serializers import PostSerializer
 from .services import (reaction_summary, set_follow, set_like, set_reaction,
                        set_save, set_share)
 

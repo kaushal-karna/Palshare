@@ -32,6 +32,11 @@ from .integrations import ask_assistant, current_weather
 
 from accounts.models import Profile
 
+from accounts.serializers import (
+    PersonRowSerializer,
+    PersonSerializer,
+)
+
 from .models import Comment, Conversation, Follow, Message, Post, Reaction
 from .services import (
     add_comment,
@@ -57,14 +62,20 @@ from .queries import (
     suggestions_for,
     visible_posts,
 )
+
+from accounts.serializers import (
+    PersonRowSerializer,
+    PersonSerializer,
+    display_name,
+    initial,
+)
+
 from .serializers import (
     CommentSerializer,
     MessageSerializer,
-    PersonRowSerializer,
-    PersonSerializer,
+    # PersonRowSerializer,
+    # PersonSerializer,j
     PostSerializer,
-    display_name,
-    initial,
 )
 
 User = get_user_model()
