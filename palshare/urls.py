@@ -18,10 +18,6 @@ from . import views
 app_name = "palshare"
 
 urlpatterns = [
-    # Auth
-    path("login/", views.login_view, name="login"),
-    path("register/", views.register_view, name="register"),
-
     # Feed and posts
     path("", views.feed, name="feed"),
     path("posts/new/", views.post_create, name="post-create"),

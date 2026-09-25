@@ -84,7 +84,7 @@ PAGE_SIZE = 20
 
 # `@login_required` alone would send people to `settings.LOGIN_URL`, which is
 # the admin login — a different app's front door. PalShare has its own.
-signed_in = login_required(login_url="palshare:login")
+signed_in = login_required(login_url="accounts:login")
 
 
 def back(request, fallback):
@@ -126,7 +126,7 @@ def shell(request, **context):
     # avatar on the same page showed the picture. A shape assembled twice is a
     # shape that disagrees with itself.
     context.setdefault("current_user",
-                       PersonRowSerializer(user, context={"request": request}).data)
+                    PersonRowSerializer(user, context={"request": request}).data)
     # `None` when the key is missing or the API is down. The widget has an
     # empty state and renders it.
     context.setdefault("weather", current_weather())
@@ -147,42 +147,6 @@ def posts_page(request, queryset):
         "page_obj": page,
     }
 
-
-# --- auth -----------------------------------------------------------------
-
-@require_http_methods(["GET", "POST"])
-def login_view(request):
-    if request.user.is_authenticated:
-        return redirect("palshare:feed")
-    form = AuthenticationForm(request, data=request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        auth_login(request, form.get_user())
-        return redirect("palshare:feed")
-    # `login.html` renders its own one-line error whenever `form.errors` is
-    # truthy, which is why the real form goes into the context rather than a
-    # hand-rolled flag.
-    return render(request, "palshare/login.html", {"form": form})
-
-
-@require_http_methods(["GET", "POST"])
-def register_view(request):
-    if request.user.is_authenticated:
-        return redirect("palshare:feed")
-    error = None
-    if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        email = request.POST.get("email", "").strip()
-        password = request.POST.get("password", "")
-        if not username or not password:
-            error = "Pick a username and a password."
-        elif User.objects.filter(username__iexact=username).exists():
-            error = "That username is taken."
-        else:
-            user = User.objects.create_user(username, email=email, password=password)
-            # Profile is automatically created by accounts.signals
-            auth_login(request, user)
-            return redirect("palshare:feed")
-    return render(request, "palshare/register.html", {"error": error})
 
 
 # --- feed and posts -------------------------------------------------------
@@ -643,7 +607,7 @@ def settings_view(request):
             # Logout is a POST for a reason: a GET logout can be triggered by
             # any <img> tag on any page on the internet.
             auth_logout(request)
-            return redirect("palshare:login")
+            return redirect("accounts:login")
         user.is_private = bool(request.POST.get("is_private"))
         user.save(update_fields=["is_private"])
         messages.success(request, "Settings saved.")

@@ -62,7 +62,7 @@ class PageTests(PalShareTestCase):
     def test_pages_require_a_login_and_send_you_to_palshares_own(self):
         self.client.logout()
         response = self.client.get(reverse("palshare:feed"))
-        self.assertRedirects(response, f"{reverse('palshare:login')}?next=/",)
+        self.assertRedirects(response, f"{reverse('accounts:login')}?next=/",)
 
     def test_feed_shows_real_rows_not_demo_data(self):
         response = self.client.get(reverse("palshare:feed"))
@@ -201,7 +201,7 @@ class MessagingTests(PalShareTestCase):
 
 class AuthTests(TestCase):
     def test_registering_creates_a_profile_and_signs_you_in(self):
-        response = self.client.post(reverse("palshare:register"),
+        response = self.client.post(reverse("accounts:register"),
                                     {"username": "kaushal", "email": "k@lab.test",
                                      "password": PASSWORD})
         self.assertRedirects(response, reverse("palshare:feed"))
@@ -209,13 +209,13 @@ class AuthTests(TestCase):
 
     def test_a_taken_username_says_so(self):
         User.objects.create_user("kaushal", password=PASSWORD)
-        response = self.client.post(reverse("palshare:register"),
+        response = self.client.post(reverse("accounts:register"),
                                     {"username": "kaushal", "password": PASSWORD})
         self.assertContains(response, "That username is taken")
 
     def test_a_bad_password_renders_the_login_error(self):
         User.objects.create_user("kaushal", password=PASSWORD)
-        response = self.client.post(reverse("palshare:login"),
+        response = self.client.post(reverse("accounts:login"),
                                     {"username": "kaushal", "password": "wrong"})
         self.assertContains(response, "did not match")
 
@@ -230,7 +230,7 @@ class AuthTests(TestCase):
         # A GET logout can be triggered by any <img> tag on the internet.
         self.assertEqual(self.client.get(reverse("palshare:settings")).status_code, 200)
         response = self.client.post(reverse("palshare:settings"), {"logout": "1"})
-        self.assertRedirects(response, reverse("palshare:login"))
+        self.assertRedirects(response, reverse("accounts:login"))
 
 
 class QueryCountTests(PalShareTestCase):

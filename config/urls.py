@@ -14,6 +14,8 @@ urlpatterns = [
     # Django admin
     path("admin/", admin.site.urls),
 
+    # Accounts urls live
+    path("", include("accounts.urls")),
     # Main Palshare application
     path("", include("palshare.urls")),
     path(
