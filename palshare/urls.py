@@ -34,7 +34,6 @@ urlpatterns = [
 
     # Profile and the follow graph
     path("u/<str:username>/", views.profile, name="profile"),
-    path("u/<str:username>/edit/", views.profile_edit, name="profile-edit"),
     path("u/<str:username>/connections/", views.connections, name="connections"),
     path("u/<str:username>/follow/", views.user_follow, name="user-follow"),
     path("u/<str:username>/message/", views.message_user, name="message-user"),
@@ -52,6 +51,4 @@ urlpatterns = [
     # Integrations
     path("assistant/", views.assistant, name="assistant"),
 
-    # Settings (public / private profile lives here)
-    path("settings/", views.settings_view, name="settings"),
 ]

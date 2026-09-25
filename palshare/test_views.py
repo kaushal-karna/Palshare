@@ -43,13 +43,13 @@ class PageTests(PalShareTestCase):
             reverse("palshare:post-create"),
             reverse("palshare:post-detail", args=[self.public.pk]),
             reverse("palshare:profile", args=["asha"]),
-            reverse("palshare:profile-edit", args=["bello"]),
+            reverse("accounts:profile-edit", args=["bello"]),
             reverse("palshare:connections", args=["asha"]),
             reverse("palshare:saved"),
             reverse("palshare:search") + "?q=post",
             reverse("palshare:inbox"),
             reverse("palshare:assistant"),
-            reverse("palshare:settings"),
+            reverse("accounts:settings"),
         ]
         for url in urls:
             with self.subTest(url=url):
@@ -149,17 +149,17 @@ class WriteTests(PalShareTestCase):
         self.assertContains(response, "a public post")
 
     def test_you_cannot_edit_someone_elses_profile(self):
-        response = self.client.post(reverse("palshare:profile-edit", args=["asha"]),
+        response = self.client.post(reverse("accounts:profile-edit", args=["asha"]),
                                     {"name": "Not Asha", "bio": ""})
         self.assertEqual(response.status_code, 403)
         self.asha.refresh_from_db()
         self.assertEqual(self.asha.first_name, "Asha")
 
     def test_the_privacy_switch_saves(self):
-        self.client.post(reverse("palshare:settings"), {"is_private": "on"})
+        self.client.post(reverse("accounts:settings"), {"is_private": "on"})
         self.bello.refresh_from_db()
         self.assertTrue(self.bello.is_private)
-        self.client.post(reverse("palshare:settings"), {})
+        self.client.post(reverse("accounts:settings"), {})
         self.bello.refresh_from_db()
         self.assertFalse(self.bello.is_private)
 
@@ -228,8 +228,8 @@ class AuthTests(TestCase):
         #The signal automatically creates the profile.
         self.client.force_login(user)
         # A GET logout can be triggered by any <img> tag on the internet.
-        self.assertEqual(self.client.get(reverse("palshare:settings")).status_code, 200)
-        response = self.client.post(reverse("palshare:settings"), {"logout": "1"})
+        self.assertEqual(self.client.get(reverse("accounts:settings")).status_code, 200)
+        response = self.client.post(reverse("accounts:settings"), {"logout": "1"})
         self.assertRedirects(response, reverse("accounts:login"))
 
 

@@ -73,8 +73,6 @@ from accounts.serializers import (
 from .serializers import (
     CommentSerializer,
     MessageSerializer,
-    # PersonRowSerializer,
-    # PersonSerializer,j
     PostSerializer,
 )
 
@@ -125,16 +123,10 @@ def shell(request, **context):
     # your initial even after you had uploaded a picture — while every other
     # avatar on the same page showed the picture. A shape assembled twice is a
     # shape that disagrees with itself.
-    context.setdefault("current_user",
-                    PersonRowSerializer(user, context={"request": request}).data)
     # `None` when the key is missing or the API is down. The widget has an
     # empty state and renders it.
-    context.setdefault("weather", current_weather())
     # The one palette, defined on the model, handed to every template that
-    # offers emoji — the picker and the reaction bar read the same list.
-    context.setdefault("emoji", [value for value, _ in Reaction.EMOJI])
-    context.setdefault("suggestions", PersonRowSerializer(
-        suggestions_for(user), many=True, context={"request": request}).data)
+    # offers emoji — the picker and the reaction bar read the same list.j
     return context
 
 
@@ -275,7 +267,7 @@ def post_detail(request, pk):
         request,
         post=PostSerializer(post, context={"request": request}).data,
         comments=CommentSerializer(comments, many=True,
-                                   context={"request": request}).data,
+                                context={"request": request}).data,
     ))
 
 
@@ -319,39 +311,6 @@ def profile(request, username):
 
 
 @signed_in
-@require_http_methods(["GET", "POST"])
-def profile_edit(request, username):
-    if username != request.user.username:
-        return HttpResponseForbidden("You can only edit your own profile.")
-    user = request.user
-    profile = profile_of(user)
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        first, _, last = name.partition(" ")
-        user.first_name, user.last_name = first, last
-        user.save(update_fields=["first_name", "last_name"])
-        profile.bio = request.POST.get("bio", "").strip()
-        profile.save(update_fields=["bio"])
-        # MEDIA_ROOT and the validator both exist now, so the file input on
-        # this form is no longer ignored. It was, silently, which is why the
-        # picture never changed and nothing ever said why.
-        upload = request.FILES.get("avatar")
-        if upload:
-            try:
-                set_avatar(profile, upload)
-            except ValidationError as exc:
-                for message in exc.messages:
-                    messages.error(request, message)
-                return render(request, "palshare/profile_edit.html", shell(
-                    request,
-                    profile=PersonSerializer(user, context={"request": request}).data))
-        messages.success(request, "Profile updated.")
-        return redirect("palshare:profile", username=user.username)
-    return render(request, "palshare/profile_edit.html", shell(
-        request, profile=PersonSerializer(user, context={"request": request}).data))
-
-
-@signed_in
 def connections(request, username):
     owner = get_object_or_404(User, username=username)
     tab = request.GET.get("tab", "followers")
@@ -366,7 +325,7 @@ def connections(request, username):
     return render(request, "palshare/connections.html", shell(
         request,
         people=PersonRowSerializer(people(request.user, queryset), many=True,
-                                   context={"request": request}).data,
+                                context={"request": request}).data,
     ))
 
 
@@ -594,24 +553,3 @@ def message_user(request, username):
         return redirect("palshare:inbox")
     conversation = conversation_with(request.user, other)
     return redirect("palshare:thread", pk=conversation.pk)
-
-
-# --- settings -------------------------------------------------------------
-
-@signed_in
-@require_http_methods(["GET", "POST"])
-def settings_view(request):
-    user = request.user
-    if request.method == "POST":
-        if "logout" in request.POST:
-            # Logout is a POST for a reason: a GET logout can be triggered by
-            # any <img> tag on any page on the internet.
-            auth_logout(request)
-            return redirect("accounts:login")
-        user.is_private = bool(request.POST.get("is_private"))
-        user.save(update_fields=["is_private"])
-        messages.success(request, "Settings saved.")
-        return redirect("palshare:settings")
-    return render(request, "palshare/settings.html", shell(
-        request, active="settings",
-        profile=PersonSerializer(request.user, context={"request": request}).data))

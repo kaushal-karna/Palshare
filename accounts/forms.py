@@ -42,3 +42,24 @@ class RegistrationForm(forms.ModelForm):
             user.save()
 
         return user
+
+
+class ProfileEditForm(forms.Form):
+    name = forms.CharField(
+        max_length=150,
+        required=False,
+    )
+    bio = forms.CharField(
+        max_length=500,
+        required=False,
+        widget=forms.Textarea,
+    )
+    avatar = forms.ImageField(
+        required=False,
+    )
+
+
+class PrivacySettingsForm(forms.Form):
+    is_private = forms.BooleanField(
+        required=False,
+    )

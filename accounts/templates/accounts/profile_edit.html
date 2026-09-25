@@ -20,6 +20,9 @@
         <textarea id="id_bio" name="bio" rows="4">{{ profile.bio|default:'' }}</textarea>
       </div>
 
+      {% if upload_name %}
+          <p class="form-help">Selected file: {{ upload_name }}</p>
+      {% endif %}
       <div class="field">
         <label for="id_avatar">Profile picture</label>
         {% comment %}

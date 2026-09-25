@@ -25,13 +25,27 @@ from accounts.services import set_avatar
 
 from .services import edit_message, set_reaction, unsend_message
 
+from io import BytesIO
+
+from PIL import Image
+
 User = get_user_model()
 
 MEDIA_ROOT = tempfile.mkdtemp(prefix="palshare-social-media-")
 
 
 def an_image(name="face.png"):
-    return SimpleUploadedFile(name, b"x" * 16, content_type="image/png")
+    # return SimpleUploadedFile(name, b"x" * 16, content_type="image/png")
+    image = Image.new("RGB", (1, 1))
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    return SimpleUploadedFile(
+        name,
+        buffer.getvalue(),
+        content_type="image/png",
+    )
 
 class SocialTestCase(TestCase):
     def setUp(self):
@@ -247,7 +261,7 @@ class AvatarTests(SocialTestCase):
         super().tearDownClass()
 
     def edit_profile(self, **extra):
-        return self.client.post(reverse("palshare:profile-edit", args=["bello"]),
+        return self.client.post(reverse("accounts:profile-edit", args=["bello"]),
                                 {"name": "Bello", "bio": "", **extra})
 
     def test_uploading_a_picture_stores_it(self):
@@ -300,8 +314,8 @@ class AvatarTests(SocialTestCase):
         self.assertContains(response, "resume.pdf")
 
     def test_you_cannot_edit_somebody_elses_profile(self):
-        response = self.client.post(reverse("palshare:profile-edit", args=["asha"]),
-                                    {"name": "Not Asha"})
+        response = self.client.post(reverse("accounts:profile-edit", args=["asha"]),
+                                        {"name": "Not Asha"})
         self.assertEqual(response.status_code, 403)
 
     def test_a_user_with_no_profile_row_does_not_break_a_byline(self):

@@ -24,3 +24,32 @@ def set_avatar(profile, upload):
     profile.save(update_fields=["avatar"])
 
     return profile
+
+
+def update_profile(user, profile, *, name="", bio="", avatar=None):
+    name = (name or "").strip()
+    first, _, last = name.partition(" ")
+
+    user.first_name = first
+    user.last_name = last
+    user.save(
+        update_fields=["first_name", "last_name"]
+    )
+
+    profile.bio = (bio or "").strip()
+    profile.save(
+        update_fields=["bio"]
+    )
+
+    if avatar is not None:
+        set_avatar(profile, avatar)
+
+    return user, profile
+
+
+def update_privacy(user, is_private):
+    user.is_private = bool(is_private)
+    user.save(
+        update_fields=["is_private"]
+    )
+    return user
