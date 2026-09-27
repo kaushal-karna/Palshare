@@ -1,7 +1,7 @@
 from accounts.serializers import PersonRowSerializer
 from palshare.integrations import current_weather
-from palshare.models import Reaction
-from palshare.queries import suggestions_for
+from interactions.models import Reaction
+from connections.queries import suggestions_for
 
 
 def common_ui(request):

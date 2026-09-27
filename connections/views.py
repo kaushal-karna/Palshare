@@ -8,8 +8,8 @@ from django.views.decorators.http import require_POST
 
 from accounts.serializers import PersonRowSerializer
 from accounts.models import User
-from palshare.queries import people
-from palshare.services import toggle_follow
+from connections.queries import people
+from connections.services import toggle_follow
 from palshare.view_helpers import back, shell, signed_in
 
 
