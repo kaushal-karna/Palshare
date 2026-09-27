@@ -3,8 +3,9 @@ from django.contrib.auth import get_user_model
 from django.db.models import Exists, OuterRef, Q
 
 from posts.models import Comment, Post
-
-from palshare.models import CommentLike, Conversation, Follow, Like, Save, Share
+from interactions.models import CommentLike, Like, Save, Share
+from messaging.models import Conversation
+from connections.models import Follow
 
 def visible_posts(user):
     """Posts `user` may see: their own, everything public, and followers-only

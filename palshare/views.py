@@ -41,7 +41,9 @@ from accounts.serializers import (
 )
 
 from posts.models import Comment, Post
-from .models import  Conversation, Follow, Message, Reaction
+from interactions.models import Reaction
+from messaging.models import Conversation, Message
+from connections.models import Follow
 from .services import (
     add_comment,
     attach_media,

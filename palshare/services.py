@@ -9,7 +9,8 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 
-from .models import Conversation, Follow
+from messaging.models import Conversation
+from connections.models import Follow
 
 
 
@@ -17,26 +18,8 @@ from .models import Conversation, Follow
 
 
 
-def set_follow(user, target, on):
-    """`ValueError` rather than letting the CheckConstraint fire.
-
-    The constraint is the guarantee and this is the error message: a database
-    constraint firing is a 500, and a check first turns it into a sentence.
-    You want both — the check for the ninety-nine per cent, the constraint for
-    the race the check cannot see.
-    """
-    if user == target:
-        raise ValueError("You cannot follow yourself.")
-    if on:
-        Follow.objects.get_or_create(follower=user, following=target)
-    else:
-        Follow.objects.filter(follower=user, following=target).delete()
-    return on
 
 
-def toggle_follow(user, target):
-    return set_follow(user, target,
-                      not Follow.objects.filter(follower=user, following=target).exists())
 
 
 
@@ -132,3 +115,6 @@ from interactions.services import (
     toggle_save,
     toggle_share,
 )
+
+# Temporary compatibility export during Connections extraction.
+from connections.services import set_follow, toggle_follow

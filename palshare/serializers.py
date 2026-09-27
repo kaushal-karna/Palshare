@@ -19,7 +19,7 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from posts.models import Comment, Media,  Post
-from .models import  Message
+from messaging.models import Message
 from .services import attach_media, reaction_summary
 
 from accounts.serializers import AuthorSerializer
