@@ -18,7 +18,6 @@ class Post(models.Model):
     share_count = models.PositiveIntegerField(default=0)
 
     class Meta:
-        db_table = "palshare_post"
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -44,5 +43,29 @@ class Media(models.Model):
     )
     alt = models.CharField(max_length=200, blank=True)
 
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="replies",
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    like_count = models.PositiveIntegerField(default=0)
+
     class Meta:
-        db_table = "palshare_media"
+        ordering = ["created_at"]
