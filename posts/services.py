@@ -1,7 +1,7 @@
 from django.db.models import F
 
 from posts.models import Comment, Media
-from palshare.validators import validate_uploads
+from common.uploads import validate_uploads
 
 def _bump(owner, field, by):
     """Move a counter cache, without letting it go negative.

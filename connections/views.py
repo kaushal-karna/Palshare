@@ -10,7 +10,7 @@ from accounts.serializers import PersonRowSerializer
 from accounts.models import User
 from connections.queries import people
 from connections.services import toggle_follow
-from palshare.view_helpers import back, shell, signed_in
+from common.web import back, shell, signed_in
 
 
 @signed_in

@@ -19,7 +19,7 @@ from django.views.decorators.http import require_POST, require_http_methods
 
 from posts.models import Comment, Post
 
-from palshare.models import Follow
+from connections.models import Follow
 
 from .services import (
     add_comment,
@@ -27,7 +27,7 @@ from .services import (
 
 )
 
-from palshare.queries import (
+from posts.queries import (
     visible_comments,
     visible_posts,
 )
@@ -44,7 +44,7 @@ PAGE_SIZE = 20
 signed_in = login_required(login_url="accounts:login")
 
 
-from palshare.view_helpers import shell
+from common.web import shell
 
 
 def posts_page(request, queryset):
@@ -87,7 +87,7 @@ def feed(request):
         # The tab says Following, so it means posts by people you follow —
         # not "everything except mine", which is what this used to do.
         posts = posts.filter(author__in=Follow.objects.filter(follower=request.user)
-                             .values("following"))
+                            .values("following"))
     return render(request, "posts/feed.html",
                   shell(request, active="feed", **posts_page(request, posts)))
 
@@ -121,7 +121,7 @@ def post_create(request):
             # A photo with no caption is a post. Empty is not.
             messages.error(request, "A post needs some text or a file.")
     return render(request, "posts/post_form.html",
-                  shell(request, heading="New post"))
+                shell(request, heading="New post"))
 
 
 @signed_in

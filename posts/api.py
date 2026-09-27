@@ -11,8 +11,8 @@ from posts.models import Post
 from posts.queries import visible_posts
 from posts.serializers import PostSerializer
 
-from palshare.permissions import IsAuthorOrReadOnly
-from palshare.services import (
+from posts.permissions import IsAuthorOrReadOnly
+from interactions.services import (
     reaction_summary,
     set_like,
     set_reaction,

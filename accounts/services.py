@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from palshare.validators import validate_upload
+from common.uploads import validate_upload
 
 
 def set_avatar(profile, upload):
