@@ -1,3 +1,7 @@
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+
 """Shared presentation helpers for HTML views."""
 
 
@@ -22,3 +26,20 @@ def shell(request, **context):
     # The one palette, defined on the model, handed to every template that
     # offers emoji — the picker and the reaction bar read the same list.j
     return context
+
+
+def back(request, fallback):
+    """Return to the page the button was on.
+
+    `url_has_allowed_host_and_scheme` is not optional: without it, `?next=` is
+    an open redirect, and an open redirect on a login-walled page is how a
+    phishing link borrows your domain.
+    """
+    target = request.POST.get("next") or request.META.get("HTTP_REFERER", "")
+    if target and url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()},
+                                                  require_https=request.is_secure()):
+        return redirect(target)
+    return redirect(fallback)
+
+
+signed_in = login_required(login_url="accounts:login")

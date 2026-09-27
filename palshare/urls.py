@@ -15,10 +15,11 @@ from django.urls import path
 
 from . import views
 from posts.urls import urlpatterns as posts_urlpatterns
+from connections.urls import urlpatterns as connections_urlpatterns
 
 app_name = "palshare"
 
-urlpatterns = posts_urlpatterns + [
+urlpatterns = posts_urlpatterns + connections_urlpatterns + [
     # Feed and posts
 
     # The one-row-or-none actions. POST only, and every one of them returns
@@ -31,8 +32,6 @@ urlpatterns = posts_urlpatterns + [
 
     # Profile and the follow graph
     path("u/<str:username>/", views.profile, name="profile"),
-    path("u/<str:username>/connections/", views.connections, name="connections"),
-    path("u/<str:username>/follow/", views.user_follow, name="user-follow"),
     path("u/<str:username>/message/", views.message_user, name="message-user"),
 
     # Saved, search

@@ -51,7 +51,10 @@ INSTALLED_APPS = [
 
     # Palshare local apps
     "accounts.apps.AccountsConfig",
+    "posts.apps.PostsConfig",
     "messaging.apps.MessagingConfig",
+    "interactions.apps.InteractionsConfig",
+    "connections.apps.ConnectionsConfig",
     "palshare.apps.PalShareConfig",
 ]
 

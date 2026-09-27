@@ -27,6 +27,8 @@ from django.template.defaultfilters import date as date_filter
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST, require_http_methods
+from .view_helpers import back, signed_in
+from connections.views import connections, user_follow
 
 from .integrations import ask_assistant, current_weather
 
@@ -83,21 +85,8 @@ PAGE_SIZE = 20
 
 # `@login_required` alone would send people to `settings.LOGIN_URL`, which is
 # the admin login — a different app's front door. PalShare has its own.
-signed_in = login_required(login_url="accounts:login")
 
 
-def back(request, fallback):
-    """Return to the page the button was on.
-
-    `url_has_allowed_host_and_scheme` is not optional: without it, `?next=` is
-    an open redirect, and an open redirect on a login-walled page is how a
-    phishing link borrows your domain.
-    """
-    target = request.POST.get("next") or request.META.get("HTTP_REFERER", "")
-    if target and url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()},
-                                                  require_https=request.is_secure()):
-        return redirect(target)
-    return redirect(fallback)
 
 
 def profile_of(user):
@@ -174,22 +163,6 @@ def profile(request, username):
 
 
 @signed_in
-def connections(request, username):
-    owner = get_object_or_404(User, username=username)
-    tab = request.GET.get("tab", "followers")
-    # `owner.followers` is the Follow rows where owner is followed, so the
-    # people are on the other end of each row. Read the related_names in
-    # models.py before changing this line; they are the opposite of what they
-    # look like.
-    if tab == "following":
-        queryset = User.objects.filter(followers__follower=owner)
-    else:
-        queryset = User.objects.filter(following__following=owner)
-    return render(request, "palshare/connections.html", shell(
-        request,
-        people=PersonRowSerializer(people(request.user, queryset), many=True,
-                                context={"request": request}).data,
-    ))
 
 
 # --- search ---------------------------------------------------------------
@@ -396,13 +369,6 @@ def comment_like(request, pk):
 
 @signed_in
 @require_POST
-def user_follow(request, username):
-    target = get_object_or_404(User, username=username)
-    try:
-        toggle_follow(request.user, target)
-    except ValueError as error:
-        messages.error(request, str(error))
-    return back(request, reverse("palshare:profile", args=[target.username]))
 
 
 @signed_in
@@ -426,3 +392,5 @@ from posts.views import (
     post_edit,
     posts_page,
 )
+
+# Temporary compatibility imports during domain extraction.
