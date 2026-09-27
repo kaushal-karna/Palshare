@@ -1,4 +1,4 @@
-"""Posts HTML views."""
+﻿"""Posts HTML views."""
 
 
 from django.contrib import messages
@@ -88,7 +88,7 @@ def feed(request):
         # not "everything except mine", which is what this used to do.
         posts = posts.filter(author__in=Follow.objects.filter(follower=request.user)
                              .values("following"))
-    return render(request, "palshare/feed.html",
+    return render(request, "posts/feed.html",
                   shell(request, active="feed", **posts_page(request, posts)))
 
 
@@ -120,7 +120,7 @@ def post_create(request):
         else:
             # A photo with no caption is a post. Empty is not.
             messages.error(request, "A post needs some text or a file.")
-    return render(request, "palshare/post_form.html",
+    return render(request, "posts/post_form.html",
                   shell(request, heading="New post"))
 
 
@@ -153,7 +153,7 @@ def post_edit(request, pk):
                 return redirect("palshare:post-detail", pk=post.pk)
         else:
             messages.error(request, "A post needs some text or a file.")
-    return render(request, "palshare/post_form.html", shell(
+    return render(request, "posts/post_form.html", shell(
         request,
         heading="Edit post",
         post=PostSerializer(post, context={"request": request}).data,
@@ -177,7 +177,7 @@ def post_detail(request, pk):
         return redirect("palshare:post-detail", pk=post.pk)
 
     comments = visible_comments(request.user, post)
-    return render(request, "palshare/post_detail.html", shell(
+    return render(request, "posts/post_detail.html", shell(
         request,
         post=PostSerializer(post, context={"request": request}).data,
         comments=CommentSerializer(comments, many=True,

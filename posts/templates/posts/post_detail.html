@@ -9,7 +9,7 @@
 {% block content %}
   <p class="crumb"><a href="{% url 'palshare:feed' %}">← Back to feed</a></p>
 
-  {% include "palshare/partials/_post_card.html" %}
+  {% include "posts/partials/_post_card.html" %}
 
   <section class="card">
     <h2 class="section-title">Comments</h2>
@@ -30,7 +30,7 @@
     {% if comments %}
       <ul class="comment-list">
         {% for comment in comments %}
-          {% include "palshare/partials/_comment.html" %}
+          {% include "posts/partials/_comment.html" %}
         {% endfor %}
       </ul>
     {% else %}

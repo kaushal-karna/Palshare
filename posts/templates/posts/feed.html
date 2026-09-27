@@ -13,7 +13,7 @@
 {% block nav %}{% with active="feed" %}{% include "palshare/partials/_nav.html" %}{% endwith %}{% endblock %}
 
 {% block content %}
-  {% include "palshare/partials/_composer.html" with action="" %}
+  {% include "posts/partials/_composer.html" with action="" %}
 
   <div class="tabs">
     <a class="tab tab-active" href="?filter=following">Following</a>
@@ -23,7 +23,7 @@
   {% if posts %}
     <div class="post-list">
       {% for post in posts %}
-        {% include "palshare/partials/_post_card.html" %}
+        {% include "posts/partials/_post_card.html" %}
       {% endfor %}
     </div>
     {% include "palshare/partials/_pagination.html" %}
