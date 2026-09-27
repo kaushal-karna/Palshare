@@ -16,8 +16,10 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.db.models import F
 
-from .models import (Comment, CommentLike, Conversation, Follow, Like, Media, Post,
-                     Reaction, Save, Share)
+
+from posts.models import Comment, Media, Post
+from .models import ( CommentLike, Conversation, Follow, Like,
+                    Reaction, Save, Share)
 from .validators import validate_upload, validate_uploads
 
 
@@ -135,17 +137,6 @@ def toggle_follow(user, target):
                       not Follow.objects.filter(follower=user, following=target).exists())
 
 
-def add_comment(user, post, text, parent=None):
-    """One place that knows a comment bumps a counter and a reply cannot nest.
-
-    The model allows any depth — a CheckConstraint cannot walk a tree — so the
-    rule that replies go one level deep lives here and in the serializer.
-    """
-    if parent is not None and parent.parent_id is not None:
-        parent = parent.parent  # a reply to a reply attaches to its top-level comment
-    comment = Comment.objects.create(post=post, author=user, text=text, parent=parent)
-    _bump(post, "comment_count", 1)
-    return comment
 
 
 def conversation_with(me, other):
@@ -166,29 +157,6 @@ def conversation_with(me, other):
     return conversation
 
 
-def attach_media(post, uploads):
-    """Store uploaded files against a post and return the new `Media` rows.
-
-    Every file is validated before the first one is written, so a four-file
-    post with one bad file stores nothing — a post that half-uploaded is worse
-    to explain than one that did not upload at all.
-
-    Raises `django.core.exceptions.ValidationError`. Callers translate it:
-    the view turns it into `messages.error`, the serializer re-raises it as
-    DRF's ValidationError so the API answers 400 rather than 500.
-
-    One thing this cannot give you: the files are written to disk by
-    `FileField.pre_save`, and a rolled-back transaction does not unwrite them.
-    A failure after this point leaves bytes in MEDIA_ROOT with no row pointing
-    at them. That is the normal Django trade-off, and the reason validation
-    happens first rather than being discovered halfway through.
-    """
-    uploads = list(uploads)
-    if not uploads:
-        return []
-    checked = validate_uploads(uploads, existing=post.media.count())
-    return [Media.objects.create(post=post, file=upload, kind=kind)
-            for upload, kind in checked]
 
 
 def set_reaction(user, post, emoji):
@@ -278,3 +246,6 @@ def unsend_message(user, message):
     message.deleted_at = timezone.now()
     message.save(update_fields=["text", "deleted_at"])
     return message
+
+# Temporary compatibility imports during domain extraction.
+from posts.services import add_comment, attach_media
