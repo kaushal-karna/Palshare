@@ -1,8 +1,8 @@
-from django.contrib.auth.decorators import login_required
+﻿from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import login, logout as auth_logout
 from django.core.exceptions import ValidationError
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.http import HttpResponseForbidden
@@ -12,6 +12,11 @@ from .models import Profile
 from .serializers import PersonSerializer
 from .forms import RegistrationForm, PrivacySettingsForm, ProfileEditForm
 from .services import update_privacy, update_profile
+
+from connections.queries import people
+from palshare.view_helpers import shell, signed_in
+from posts.views import posts_page
+from posts.queries import may_see_posts, visible_posts
 
 
 
@@ -192,4 +197,57 @@ def settings_view(request):
                 context={"request": request},
             ).data,
         },
+    )
+
+
+# --- public user profile -------------------------------------
+
+@signed_in
+def user_profile(request, username):
+    owner = get_object_or_404(
+        people(request.user),
+        username=username,
+    )
+
+    # Profile is created automatically when the User is created.
+    # No get_or_create() compatibility helper is needed here.
+
+    tab = request.GET.get("tab", "posts")
+    if tab not in {"posts", "media", "likes"}:
+        tab = "posts"
+
+    context = shell(
+        request,
+        active="profile",
+        posts=[],
+        tab=tab,
+        profile=PersonSerializer(
+            owner,
+            context={"request": request},
+        ).data,
+    )
+
+    if may_see_posts(request.user, owner):
+        posts = visible_posts(request.user)
+
+        if tab == "media":
+            posts = (
+                posts
+                .filter(
+                    author=owner,
+                    media__isnull=False,
+                )
+                .distinct()
+            )
+        elif tab == "likes":
+            posts = posts.filter(likes__user=owner)
+        else:
+            posts = posts.filter(author=owner)
+
+        context.update(posts_page(request, posts))
+
+    return render(
+        request,
+        "accounts/user_profile.html",
+        context,
     )

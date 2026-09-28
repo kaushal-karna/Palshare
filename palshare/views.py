@@ -28,6 +28,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST, require_http_methods
 from .view_helpers import back, signed_in
+from accounts.views import user_profile as profile
 from connections.views import connections, user_follow
 
 from .integrations import ask_assistant, current_weather
@@ -86,21 +87,6 @@ PAGE_SIZE = 20
 
 
 
-def profile_of(user):
-    """Every user in this app has a Profile; some of them do not know it yet.
-
-    `get_or_create` rather than a signal: a signal fires on every `User` save
-    in the whole project, including the blog app's, and this is the only place
-    that needs the row.
-    """
-    profile, _ = Profile.objects.get_or_create(user=user)
-    return profile
-
-
-
-
-
-
 
 # --- feed and posts -------------------------------------------------------
 
@@ -122,105 +108,14 @@ def profile_of(user):
 
 
 
-# --- profile and the follow graph ----------------------------------------
-
-@signed_in
-def profile(request, username):
-    # Fetched through `people()` so the header's Follow button reads the same
-    # annotation every user row in the app reads, rather than its own query.
-    owner = get_object_or_404(people(request.user), username=username)
-    profile_of(owner)  # `may_see_posts` reads `owner.profile`
-
-    # The three tabs were `?tab=` links that no view read, so Media and Likes
-    # both rendered the Posts list and the active tab never moved.
-    tab = request.GET.get("tab", "posts")
-    if tab not in {"posts", "media", "likes"}:
-        tab = "posts"
-
-    context = shell(request, active="profile", posts=[], tab=tab,
-                    profile=PersonSerializer(owner, context={"request": request}).data)
-    if may_see_posts(request.user, owner):
-        posts = visible_posts(request.user)
-        if tab == "media":
-            # `media__isnull=False` alone returns one row per attached file.
-            posts = posts.filter(author=owner, media__isnull=False).distinct()
-        elif tab == "likes":
-            # Posts this person liked, not posts of theirs that were liked —
-            # which is what the word means everywhere else it appears in a
-            # social app.
-            posts = posts.filter(likes__user=owner)
-        else:
-            posts = posts.filter(author=owner)
-        context.update(posts_page(request, posts))
-    return render(request, "palshare/profile.html", context)
-
-
 # --- search ---------------------------------------------------------------
 
 # --- messaging ------------------------------------------------------------
 
-def when(moment):
-    """A time for today, a date for anything older. `demo.py` showed both."""
-    local = timezone.localtime(moment)
-    if local.date() == timezone.localdate():
-        return date_filter(local, "H:i")
-    return date_filter(local, "j M")
 
 
-@signed_in
-def inbox(request):
-    conversations = [{
-        "id": row["conversation"].pk,
-        "person": PersonRowSerializer(row["other"], context={"request": request}).data,
-        "last_message": row["last"].text if row["last"] else "",
-        "unread": row["unread"],
-        "updated_at": when(row["conversation"].updated_at),
-    } for row in conversations_for(request.user)]
-    return render(request, "palshare/inbox.html",
-                  shell(request, active="inbox", conversations=conversations))
 
 
-@signed_in
-@require_http_methods(["GET", "POST"])
-def thread(request, pk):
-    # Filtering by participant is the permission check: a conversation you are
-    # not in does not exist as far as this view is concerned.
-    conversation = get_object_or_404(
-        Conversation.objects.filter(participants=request.user).prefetch_related("participants"),
-        pk=pk)
-    other = next((p for p in conversation.participants.all() if p.pk != request.user.pk),
-                 request.user)
-
-    if request.method == "POST":
-        text = request.POST.get("text", "").strip()
-        if text:
-            Message.objects.create(conversation=conversation, sender=request.user, text=text)
-            # `Meta.ordering` sorts the inbox by `updated_at`, which only means
-            # anything if sending a message touches it.
-            conversation.save(update_fields=["updated_at"])
-        return redirect("palshare:thread", pk=conversation.pk)
-
-    unread = conversation.messages.exclude(sender=request.user).filter(read_at__isnull=True)
-    unread.update(read_at=timezone.now())
-
-    thread_messages = conversation.messages.select_related("sender")
-    return render(request, "palshare/thread.html", shell(
-        request,
-        active="inbox",
-        # `?edit=<id>` opens one bubble as a form. A query parameter rather
-        # than JavaScript, for the same reason every other control here is a
-        # form: it survives a reload and it works with the keyboard.
-        editing=request.GET.get("edit", ""),
-        emoji=[value for value, _ in Reaction.EMOJI],
-        conversation={
-            "id": conversation.pk,
-            "person": PersonRowSerializer(other, context={"request": request}).data,
-        },
-        # Never `messages`: django.contrib.messages owns that name, and
-        # base.html renders whatever is in it as flash messages.
-        thread_messages=MessageSerializer(thread_messages, many=True,
-                                          context={"request": request}).data,
-    ))
 
 
 # --- integrations ---------------------------------------------------------
@@ -266,73 +161,10 @@ def assistant(request):
 # keyboard, with the back button, and with JavaScript switched off, and the
 # whole app already reloads on every write anyway.
 
-@signed_in
-@require_POST
 
 
-@signed_in
-@require_POST
 
 
-@signed_in
-@require_POST
-
-
-@signed_in
-@require_POST
-
-
-# --- messages you can take back -------------------------------------------
-#
-# Both of these are POST-only and both re-check the sender in `services.py`,
-# not here: "you may only change your own message" is a rule about messages,
-# and a rule that lives in a view is a rule the API gets to disagree with.
-
-@signed_in
-@require_POST
-def message_edit(request, pk):
-    message = get_object_or_404(
-        Message.objects.filter(conversation__participants=request.user), pk=pk)
-    try:
-        edit_message(request.user, message, request.POST.get("text", ""))
-    except ValidationError as exc:
-        for text in exc.messages:
-            messages.error(request, text)
-    return redirect("palshare:thread", pk=message.conversation_id)
-
-
-@signed_in
-@require_POST
-def message_unsend(request, pk):
-    message = get_object_or_404(
-        Message.objects.filter(conversation__participants=request.user), pk=pk)
-    try:
-        unsend_message(request.user, message)
-    except ValidationError as exc:
-        for text in exc.messages:
-            messages.error(request, text)
-    return redirect("palshare:thread", pk=message.conversation_id)
-
-
-@signed_in
-@require_POST
-
-
-@signed_in
-@require_POST
-
-
-@signed_in
-@require_POST
-def message_user(request, username):
-    """The profile's Message button. Opens the one conversation with that
-    person, creating it on first use."""
-    other = get_object_or_404(User, username=username)
-    if other == request.user:
-        messages.error(request, "You cannot message yourself.")
-        return redirect("palshare:inbox")
-    conversation = conversation_with(request.user, other)
-    return redirect("palshare:thread", pk=conversation.pk)
 
 # Temporary compatibility imports during domain extraction.
 from .view_helpers import shell
@@ -351,3 +183,12 @@ from posts.views import saved
 
 # Temporary compatibility import during domain extraction.
 from search.views import search
+
+# Temporary compatibility imports during domain extraction.
+from messaging.views import (
+    inbox,
+    message_edit,
+    message_unsend,
+    message_user,
+    thread,
+)

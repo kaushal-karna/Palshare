@@ -1,7 +1,7 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import path
 
-from .views import UserLoginView, profile_view, register_view, profile_edit, settings_view
+from .views import UserLoginView, profile_view, register_view, profile_edit, settings_view, user_profile
 
 
 app_name = "accounts"
@@ -32,6 +32,8 @@ urlpatterns = [
         profile_view,
         name="profile",
     ),
+
+    path("u/<str:username>/", user_profile, name="user-profile"),
 
     path(
     "u/<str:username>/edit/",
