@@ -12,8 +12,12 @@ from django.test.utils import CaptureQueriesContext
 from django.test import TestCase
 from django.urls import reverse
 
-from accounts.models import Profile
-from .models import Comment, Conversation, Follow, Like, Post, Save
+from accounts.models import Profile, User
+
+from posts.models import Comment, Post
+from .models import Conversation
+from connections.models import Follow
+from interactions.models import Like, Save
 
 User = get_user_model()
 

@@ -14,7 +14,7 @@ from rest_framework import serializers
 
 from posts.models import Comment, Media,  Post
 from posts.services import attach_media
-from palshare.services import reaction_summary
+from interactions.services import reaction_summary
 
 from accounts.serializers import AuthorSerializer
 

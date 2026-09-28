@@ -17,18 +17,18 @@ class CustomUserAdmin(UserAdmin):
         "is_private",
         "date_joined",
     )
-    
+
     list_filter = (
         "is_staff",
         "is_verified",
-        "is_private",        
+        "is_private",
     )
-    
+
     search_fields = (
         "username",
         "email",
     )
-    
+
     fieldsets = UserAdmin.fieldsets + (
         (
             "Palshare Account",
@@ -55,7 +55,7 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
     )
-    
+
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = (
@@ -63,7 +63,7 @@ class ProfileAdmin(admin.ModelAdmin):
         "location",
         "created_at",
     )
-    
+
     search_fields = (
         "user__username",
         "user__email",

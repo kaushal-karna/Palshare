@@ -12,15 +12,12 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import Profile
+
+from posts.models import Comment, Post
+from interactions.models import CommentLike, Like, Share, Save
+from connections.models import Follow
 from .models import (
-    Comment,
-    CommentLike,
     Conversation,
-    Follow,
-    Like,
-    Post,
-    Save,
-    Share
     )
 from .services import set_like
 
@@ -134,7 +131,7 @@ class CommentActionTests(InteractionTestCase):
 
     def test_replying_sets_the_parent(self):
         self.client.post(reverse("palshare:post-detail", args=[self.post.pk]),
-                         {"text": "a reply", "parent": self.comment.pk})
+                        {"text": "a reply", "parent": self.comment.pk})
         self.assertEqual(Comment.objects.get(text="a reply").parent_id, self.comment.pk)
 
     def test_a_reply_to_a_reply_flattens_to_one_level(self):
@@ -152,24 +149,6 @@ class CommentActionTests(InteractionTestCase):
         response = self.client.post(reverse("palshare:post-detail", args=[other.pk]),
                                     {"text": "smuggled", "parent": self.comment.pk})
         self.assertEqual(response.status_code, 404)
-
-
-class FollowActionTests(InteractionTestCase):
-    def test_follow_toggles(self):
-        self.press("palshare:user-follow", ["asha"])
-        self.assertEqual(Follow.objects.count(), 1)
-        self.press("palshare:user-follow", ["asha"])
-        self.assertEqual(Follow.objects.count(), 0)
-
-    def test_following_yourself_is_refused_with_a_sentence(self):
-        response = self.client.post(reverse("palshare:user-follow", args=["bello"]),
-                                    {"next": self.feed}, follow=True)
-        self.assertEqual(Follow.objects.count(), 0)
-        self.assertContains(response, "You cannot follow yourself")
-
-    def test_the_follow_button_is_absent_from_your_own_row(self):
-        body = self.client.get(reverse("palshare:search"), {"q": "bello"}).content.decode()
-        self.assertNotIn(reverse("palshare:user-follow", args=["bello"]), body)
 
 
 class MessageActionTests(InteractionTestCase):

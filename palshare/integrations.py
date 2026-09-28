@@ -16,6 +16,7 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
+import requests
 
 from django.conf import settings
 from django.core.cache import cache
@@ -26,7 +27,7 @@ WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
 WEATHER_TTL = 600  # ten minutes
 
 NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
-NVIDIA_MODEL = "meta/llama-3.1-8b-instruct"
+
 
 
 def current_weather(city="Kathmandu"):
@@ -66,36 +67,107 @@ def current_weather(city="Kathmandu"):
     return data
 
 
+# def ask_assistant(prompt):
+#     """Same shape as `current_weather`, with a longer timeout and no cache.
+
+#     No cache because two people asking the same question want two answers, and
+#     a longer timeout because a model is seconds where a weather API is
+#     milliseconds. That is also why this only ever runs in the assistant's own
+#     POST and never in the request that renders a page.
+
+#     Nothing here forwards a post: a followers-only post is not ours to send to
+#     somebody else's model. Only what the person typed goes out.
+#     """
+#     if not settings.NVIDIA_API_KEY:
+#         logger.warning("NVIDIA_API_KEY is not set; the assistant will show its error state")
+#         return None
+
+#     body = json.dumps({
+#         "model": settings.NVIDIA_MODEL,
+#         "messages": [{"role": "user", "content": prompt}],
+#         "max_tokens": 300,
+#         "reasoning_effort": "low",
+#         "stream": False,
+#     }).encode("utf-8")
+#     request = urllib.request.Request(
+#         NVIDIA_URL,
+#         data=body,
+#         headers={
+#             "Accept": "application/json",
+#             "Content-Type": "application/json",
+#             "Authorization": f"Bearer {settings.NVIDIA_API_KEY}"},
+#     )
+
+#     try:
+#         with urllib.request.urlopen(request, timeout=settings.NVIDIA_TIMEOUT) as response:
+#             payload = json.load(response)
+
+#         return payload["choices"][0]["message"]["content"].strip()
+
+#     except urllib.error.HTTPError as exc:
+#         try:
+#             detail = exc.read().decode("utf-8", errors="replace")
+#         except Exception:
+#             detail = ""
+
+#         logger.error(
+#         "NVIDIA API error: HTTP %s: %s",
+#         exc.code,
+#         detail,
+#         )
+#         return None
+
+#     except (urllib.error.URLError, TimeoutError, KeyError, IndexError, ValueError):
+#         logger.exception("assistant call failed")
+#         return None
+
+
+
+NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
+
+
 def ask_assistant(prompt):
-    """Same shape as `current_weather`, with a longer timeout and no cache.
+    """Ask NVIDIA for an assistant response.
 
-    No cache because two people asking the same question want two answers, and
-    a longer timeout because a model is seconds where a weather API is
-    milliseconds. That is also why this only ever runs in the assistant's own
-    POST and never in the request that renders a page.
-
-    Nothing here forwards a post: a followers-only post is not ours to send to
-    somebody else's model. Only what the person typed goes out.
+    Returns None when the service is unavailable, unconfigured,
+    or the response cannot be parsed.
     """
     if not settings.NVIDIA_API_KEY:
-        logger.warning("NVIDIA_API_KEY is not set; the assistant will show its error state")
+        logger.warning(
+            "NVIDIA_API_KEY is not set; the assistant will show its error state"
+        )
         return None
 
-    body = json.dumps({
-        "model": NVIDIA_MODEL,
+    body = {
+        "model": settings.NVIDIA_MODEL,
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 300,
-    }).encode()
-    request = urllib.request.Request(
-        NVIDIA_URL,
-        data=body,
-        headers={"Content-Type": "application/json",
-                 "Authorization": f"Bearer {settings.NVIDIA_API_KEY}"},
-    )
+        "temperature": 0.2,
+        "reasoning_effort": "low",
+        "stream": False,
+    }
+
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
-            payload = json.load(response)
-        return payload["choices"][0]["message"]["content"].strip()
-    except (urllib.error.URLError, TimeoutError, KeyError, IndexError, ValueError):
+        response = requests.post(
+            NVIDIA_URL,
+            json=body,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {settings.NVIDIA_API_KEY}",
+            },
+            timeout=(10, settings.NVIDIA_TIMEOUT),
+        )
+        response.raise_for_status()
+        payload = response.json()
+        content = payload["choices"][0]["message"]["content"]
+        return content.strip() or None
+
+    except requests.exceptions.HTTPError:
+        detail = response.text[:500] if response is not None else ""
+        logger.error("NVIDIA API error: HTTP %s: %s", response.status_code, detail)
+        return None
+
+    except (requests.exceptions.RequestException, KeyError, IndexError, ValueError):
         logger.exception("assistant call failed")
         return None

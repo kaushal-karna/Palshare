@@ -25,7 +25,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Media, Post
+from posts.models import Media, Post
 from .services import attach_media
 from .validators import MAX_BYTES, MAX_FILES, kind_for, validate_uploads
 

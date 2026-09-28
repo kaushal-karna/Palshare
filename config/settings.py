@@ -37,6 +37,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "search",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -232,3 +233,8 @@ LOGOUT_REDIRECT_URL = "/login/"
 
 WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY", "")
 NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY", "")
+NVIDIA_MODEL = os.environ.get(
+    "NVIDIA_MODEL",
+    "openai/gpt-oss-20b",
+)
+NVIDIA_TIMEOUT = int(os.environ.get("NVIDIA_TIMEOUT", "60"))

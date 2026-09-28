@@ -13,7 +13,7 @@ class Like(models.Model):
     class Meta:
         # The database enforces "one like per person per post". Checking in
         # Python instead loses the race between two taps on a slow connection.
-        constraints = [models.UniqueConstraint(fields=["user", "post"], name="interactions_one_like_per_user")]
+        constraints = [models.UniqueConstraint(fields=["user", "post"], name="one_like_per_user")]
 
 
 class Save(models.Model):
@@ -23,7 +23,7 @@ class Save(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user", "post"], name="interactions_one_save_per_user")]
+        constraints = [models.UniqueConstraint(fields=["user", "post"], name="one_save_per_user")]
 
 
 class Share(models.Model):
@@ -40,7 +40,7 @@ class Share(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user", "post"], name="interactions_one_share_per_user")]
+        constraints = [models.UniqueConstraint(fields=["user", "post"], name="one_share_per_user")]
 
 
 class Reaction(models.Model):
@@ -74,7 +74,7 @@ class Reaction(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["user", "post"],
-                                                name="interactions_one_reaction_per_user")]
+                                                name="one_reaction_per_user")]
 
 
 class CommentLike(models.Model):
@@ -87,4 +87,4 @@ class CommentLike(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["user", "comment"],
-                                                name="interactions_one_comment_like_per_user")]
+                                                name="one_comment_like_per_user")]

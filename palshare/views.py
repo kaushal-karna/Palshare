@@ -48,14 +48,9 @@ from .services import (
     add_comment,
     attach_media,
     edit_message,
-    set_reaction,
     unsend_message,
     conversation_with,
-    toggle_comment_like,
     toggle_follow,
-    toggle_like,
-    toggle_save,
-    toggle_share,
 )
 from .queries import (
     conversations_for,
@@ -125,10 +120,6 @@ def profile_of(user):
 @require_http_methods(["GET", "POST"])
 
 
-@signed_in
-def saved(request):
-    return render(request, "palshare/saved.html", shell(
-        request, active="saved", **posts_page(request, saved_posts(request.user))))
 
 
 # --- profile and the follow graph ----------------------------------------
@@ -164,24 +155,7 @@ def profile(request, username):
     return render(request, "palshare/profile.html", context)
 
 
-@signed_in
-
-
 # --- search ---------------------------------------------------------------
-
-@signed_in
-def search(request):
-    results = search_query(request.user, request.GET.get("q", ""))
-    return render(request, "palshare/search.html", shell(
-        request,
-        active="search",
-        query=results["query"],
-        people=PersonRowSerializer(results["people"], many=True,
-                                   context={"request": request}).data,
-        posts=PostSerializer(results["posts"], many=True,
-                             context={"request": request}).data,
-    ))
-
 
 # --- messaging ------------------------------------------------------------
 
@@ -294,37 +268,18 @@ def assistant(request):
 
 @signed_in
 @require_POST
-def post_like(request, pk):
-    toggle_like(request.user, get_object_or_404(visible_posts(request.user), pk=pk))
-    return back(request, "palshare:feed")
 
 
 @signed_in
 @require_POST
-def post_save(request, pk):
-    toggle_save(request.user, get_object_or_404(visible_posts(request.user), pk=pk))
-    return back(request, "palshare:feed")
 
 
 @signed_in
 @require_POST
-def post_share(request, pk):
-    toggle_share(request.user, get_object_or_404(visible_posts(request.user), pk=pk))
-    return back(request, "palshare:feed")
 
 
 @signed_in
 @require_POST
-def post_react(request, pk):
-    """The emoji bar under a post. One reaction per person, and pressing the
-    one you already picked takes it back."""
-    post = get_object_or_404(visible_posts(request.user), pk=pk)
-    try:
-        set_reaction(request.user, post, request.POST.get("emoji") or None)
-    except ValidationError as exc:
-        for message in exc.messages:
-            messages.error(request, message)
-    return back(request, reverse("palshare:post-detail", args=[post.pk]))
 
 
 # --- messages you can take back -------------------------------------------
@@ -361,12 +316,6 @@ def message_unsend(request, pk):
 
 @signed_in
 @require_POST
-def comment_like(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    # You may only like a comment on a post you are allowed to read.
-    get_object_or_404(visible_posts(request.user), pk=comment.post_id)
-    toggle_comment_like(request.user, comment)
-    return back(request, reverse("palshare:post-detail", args=[comment.post_id]))
 
 
 @signed_in
@@ -396,3 +345,9 @@ from posts.views import (
 )
 
 # Temporary compatibility imports during domain extraction.
+
+# Temporary compatibility export during domain extraction.
+from posts.views import saved
+
+# Temporary compatibility import during domain extraction.
+from search.views import search

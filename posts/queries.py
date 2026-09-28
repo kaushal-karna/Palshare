@@ -47,6 +47,7 @@ def may_see_posts(viewer, owner):
         return True
     return Follow.objects.filter(follower=viewer, following=owner).exists()
 
+
 def visible_comments(user, post):
     """A post's top-level comments, with the viewer's own likes annotated.
 

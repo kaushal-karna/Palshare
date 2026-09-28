@@ -11,12 +11,12 @@ it — only `urls.py` does, on one line per route.
 Shape summary
 -------------
 post          id, author, age, text, media, likes, comments, shares,
-              liked, saved
+            liked, saved
 author/person id, username, name, avatar, bio, followers, following, is_following
 comment       id, author, age, text, likes, replies
 conversation  id, person, last_message, unread, updated_at
 message       id, mine, text, sent_at   (pass as `thread_messages`, never
-              `messages` — that name belongs to django.contrib.messages)
+            `messages` — that name belongs to django.contrib.messages)
 weather       city, temp_c, summary, icon, updated_at
 ai turn       role ("you" | "assistant"), text
 """
@@ -126,5 +126,5 @@ WEATHER = {
 AI_TURNS = [
     {"role": "you", "text": "Write a caption for a photo of the team at hour ten."},
     {"role": "assistant", "text": "Two hours left, eleven people, one repository. "
-                                  "Whatever happens next, it compiles."},
+                                "Whatever happens next, it compiles."},
 ]

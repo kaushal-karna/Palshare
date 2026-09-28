@@ -9,8 +9,7 @@ class Conversation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = "palshare"
-        db_table = "palshare_conversation"
+        db_table = "messaging_conversation"
         ordering = ["-updated_at"]
 
 
@@ -33,8 +32,7 @@ class Message(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        app_label = "palshare"
-        db_table = "palshare_message"
+        db_table = "messaging_message"
         ordering = ["sent_at"]
 
     @property

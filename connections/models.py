@@ -12,8 +12,7 @@ class Follow(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        app_label = "palshare"
-        db_table = "palshare_follow"
+        db_table = "connections_follow"
         constraints = [
             models.UniqueConstraint(fields=["follower", "following"], name="one_follow_per_pair"),
             # Nobody follows themselves. Cheaper here than in every view that

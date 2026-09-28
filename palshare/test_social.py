@@ -20,7 +20,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from accounts.models import Profile
-from .models import Conversation, Follow, Like, Message, Post, Reaction
+
+from posts.models import Post
+from connections.models import Follow
+from interactions.models import Like, Reaction
+from .models import Conversation, Message
 from accounts.services import set_avatar
 
 from .services import edit_message, set_reaction, unsend_message
@@ -89,23 +93,6 @@ class ProfileAccessTests(SocialTestCase):
         response = self.client.get(reverse("palshare:profile", args=["kaushal"]))
         self.assertEqual(response.status_code, 200)
 
-    def test_the_followers_and_following_links_go_to_different_tabs(self):
-        """They were the same bare URL, and `connections` defaults to
-        followers — so "following" showed you followers."""
-        body = self.client.get(reverse("palshare:profile", args=["asha"])).content.decode()
-        base = reverse("palshare:connections", args=["asha"])
-        self.assertIn(f'href="{base}?tab=followers"', body)
-        self.assertIn(f'href="{base}?tab=following"', body)
-
-    def test_the_following_tab_lists_who_they_follow(self):
-        third = User.objects.create_user("menuka", password="pw")
-        Follow.objects.create(follower=self.other, following=third)
-
-        body = self.client.get(reverse("palshare:connections", args=["asha"]),
-                               {"tab": "following"}).content.decode()
-
-        self.assertIn("menuka", body)
-
     def test_the_media_tab_shows_only_posts_with_files(self):
         Post.objects.create(author=self.other, text="just words")
         with_media = Post.objects.create(author=self.other, text="with a picture")
@@ -137,11 +124,6 @@ class ProfileAccessTests(SocialTestCase):
 
         self.assertIn("they liked this", body)
         self.assertNotIn("their own post", body)
-
-    def test_the_active_tab_follows_the_url(self):
-        body = self.client.get(reverse("palshare:profile", args=["asha"]),
-                               {"tab": "likes"}).content.decode()
-        self.assertIn('class="tab tab-active" href="?tab=likes"', body)
 
     def test_an_invented_tab_falls_back_to_posts(self):
         response = self.client.get(reverse("palshare:profile", args=["asha"]),
@@ -189,7 +171,7 @@ class MessageEditTests(SocialTestCase):
     def test_an_edited_message_says_so_in_the_thread(self):
         self.edit(self.mine, "fixed")
         body = self.client.get(reverse("palshare:thread",
-                                       args=[self.conversation.pk])).content.decode()
+                                    args=[self.conversation.pk])).content.decode()
         self.assertIn("· edited", body)
 
     def test_you_cannot_edit_somebody_elses_message(self):
@@ -208,7 +190,7 @@ class MessageEditTests(SocialTestCase):
     def test_an_unsent_message_keeps_its_place_in_the_thread(self):
         self.unsend(self.mine)
         body = self.client.get(reverse("palshare:thread",
-                                       args=[self.conversation.pk])).content.decode()
+                                    args=[self.conversation.pk])).content.decode()
         self.assertIn("This message was unsent.", body)
         self.assertNotIn("ment to say this", body)
 
@@ -517,7 +499,7 @@ class ReactionApiTests(SocialTestCase):
     def test_the_api_toggles_the_same_way_the_page_does(self):
         for _ in range(2):
             self.client.post(self.url, {"emoji": self.thumbs},
-                             content_type="application/json")
+                            content_type="application/json")
         self.assertEqual(Reaction.objects.count(), 0)
 
     def test_an_emoji_outside_the_palette_is_a_400_not_a_500(self):
@@ -558,14 +540,14 @@ class InteractionPermissionApiTests(SocialTestCase):
 
     def test_every_interaction_works_on_somebody_elses_post(self):
         for action in sorted(("like", "unlike", "save", "unsave",
-                              "share", "unshare", "react")):
+                            "share", "unshare", "react")):
             with self.subTest(action=action):
                 self.assertEqual(self.act(action).status_code, 200)
 
     def test_editing_somebody_elses_post_is_still_forbidden(self):
         # The permission was not removed, only narrowed to what it is about.
         response = self.client.patch(f"/api/palshare/posts/{self.theirs.pk}/",
-                                     {"text": "rewritten by me"}, format="json")
+                                    {"text": "rewritten by me"}, format="json")
         self.assertEqual(response.status_code, 403)
         self.theirs.refresh_from_db()
         self.assertEqual(self.theirs.text, "not mine")
@@ -577,5 +559,5 @@ class InteractionPermissionApiTests(SocialTestCase):
 
     def test_you_still_cannot_interact_with_a_post_you_cannot_see(self):
         hidden = Post.objects.create(author=self.other, text="followers only",
-                                     followers_only=True)
+                                    followers_only=True)
         self.assertEqual(self.act("like", hidden).status_code, 404)

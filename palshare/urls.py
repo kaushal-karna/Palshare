@@ -14,6 +14,7 @@ the two side by side.
 from django.urls import path
 
 from . import views
+from interactions import views as interaction_views
 from posts.urls import urlpatterns as posts_urlpatterns
 from connections.urls import urlpatterns as connections_urlpatterns
 
@@ -24,11 +25,11 @@ urlpatterns = posts_urlpatterns + connections_urlpatterns + [
 
     # The one-row-or-none actions. POST only, and every one of them returns
     # you to the page whose button you pressed.
-    path("posts/<int:pk>/like/", views.post_like, name="post-like"),
-    path("posts/<int:pk>/save/", views.post_save, name="post-save"),
-    path("posts/<int:pk>/share/", views.post_share, name="post-share"),
-    path("comments/<int:pk>/like/", views.comment_like, name="comment-like"),
-    path("posts/<int:pk>/react/", views.post_react, name="post-react"),
+    path("posts/<int:pk>/like/", interaction_views.post_like, name="post-like"),
+    path("posts/<int:pk>/save/", interaction_views.post_save, name="post-save"),
+    path("posts/<int:pk>/share/", interaction_views.post_share, name="post-share"),
+    path("comments/<int:pk>/like/", interaction_views.comment_like, name="comment-like"),
+    path("posts/<int:pk>/react/", interaction_views.post_react, name="post-react"),
 
     # Profile and the follow graph
     path("u/<str:username>/", views.profile, name="profile"),

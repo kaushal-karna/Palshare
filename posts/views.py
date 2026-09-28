@@ -1,4 +1,4 @@
-﻿"""Posts HTML views."""
+"""Posts HTML views."""
 
 
 from django.contrib import messages
@@ -28,6 +28,7 @@ from .services import (
 )
 
 from posts.queries import (
+    saved_posts,
     visible_comments,
     visible_posts,
 )
@@ -183,3 +184,9 @@ def post_detail(request, pk):
         comments=CommentSerializer(comments, many=True,
                                 context={"request": request}).data,
     ))
+
+
+@signed_in
+def saved(request):
+    return render(request, "palshare/saved.html", shell(
+        request, active="saved", **posts_page(request, saved_posts(request.user))))
