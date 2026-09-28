@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+﻿from django.contrib.auth import get_user_model
 
 from django.test import TestCase
 from django.urls import reverse
@@ -23,7 +23,7 @@ class ConnectionActionTestCase(TestCase):
             password=PASSWORD,
             first_name="Bello",
         )
-        
+
         self.other = self.asha
 
         self.client.login(
@@ -62,7 +62,7 @@ class ProfileConnectionTests(ConnectionActionTestCase):
     def test_the_followers_and_following_links_go_to_different_tabs(self):
         """They were the same bare URL, and `connections` defaults to
         followers — so "following" showed you followers."""
-        body = self.client.get(reverse("palshare:profile", args=["asha"])).content.decode()
+        body = self.client.get(reverse("accounts:user-profile", args=["asha"])).content.decode()
         base = reverse("palshare:connections", args=["asha"])
         self.assertIn(f'href="{base}?tab=followers"', body)
         self.assertIn(f'href="{base}?tab=following"', body)
@@ -77,6 +77,6 @@ class ProfileConnectionTests(ConnectionActionTestCase):
         self.assertIn("menuka", body)
 
     def test_the_active_tab_follows_the_url(self):
-        body = self.client.get(reverse("palshare:profile", args=["asha"]),
+        body = self.client.get(reverse("accounts:user-profile", args=["asha"]),
                                {"tab": "likes"}).content.decode()
         self.assertIn('class="tab tab-active" href="?tab=likes"', body)

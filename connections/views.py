@@ -1,4 +1,4 @@
-"""Connections HTML views."""
+﻿"""Connections HTML views."""
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -40,4 +40,4 @@ def user_follow(request, username):
         toggle_follow(request.user, target)
     except ValueError as error:
         messages.error(request, str(error))
-    return back(request, reverse("palshare:profile", args=[target.username]))
+    return back(request, reverse("accounts:user-profile", args=[target.username]))

@@ -1,4 +1,4 @@
-{% load palshare_static %}
+﻿{% load palshare_static %}
 {% comment %}
   Top bar: brand, global search, the signed-in user.
   Reads: current_user (username, name, avatar, avatar_url)
@@ -38,7 +38,7 @@
             <path d="M6 20V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v15l-6-4-6 4Z"/>
           </svg>
         </a>
-        <a class="topbar-profile" href="{% url 'palshare:profile' current_user.username %}"
+        <a class="topbar-profile" href="{% url 'accounts:user-profile' current_user.username %}"
            aria-label="Your profile: {{ current_user.name|default:current_user.username }}">
           <span class="avatar topbar-avatar" aria-hidden="true">{% include "palshare/partials/_avatar.html" with who=current_user %}</span>
           <span class="topbar-profile-text">

@@ -1,4 +1,4 @@
-{% comment %}
+﻿{% comment %}
   Left column. `nav-item-active` is set by each page through the `active`
   context variable, so there is one nav and no per-page copies of it.
   Reads: active (string), current_user
@@ -11,7 +11,7 @@
   <a class="nav-item {% if active == 'assistant' %}nav-item-active{% endif %}" href="{% url 'palshare:assistant' %}">Assistant</a>
   {% if current_user %}
     <a class="nav-item {% if active == 'profile' %}nav-item-active{% endif %}"
-       href="{% url 'palshare:profile' current_user.username %}">Profile</a>
+       href="{% url 'accounts:user-profile' current_user.username %}">Profile</a>
     <a class="nav-item {% if active == 'settings' %}nav-item-active{% endif %}" href="{% url 'accounts:settings' %}">Settings</a>
   {% endif %}
 

@@ -1,4 +1,4 @@
-"""The HTML half: does every page render, and does it obey the rules?
+﻿"""The HTML half: does every page render, and does it obey the rules?
 
 The contract these check is `demo.py` — the keys each template reads. A view is
 correct when its context has the same shape the shell was built against, which
@@ -46,7 +46,7 @@ class PageTests(PalShareTestCase):
             reverse("palshare:feed"),
             reverse("palshare:post-create"),
             reverse("palshare:post-detail", args=[self.public.pk]),
-            reverse("palshare:profile", args=["asha"]),
+            reverse("accounts:user-profile", args=["asha"]),
             reverse("accounts:profile-edit", args=["bello"]),
             reverse("palshare:connections", args=["asha"]),
             reverse("palshare:saved"),
@@ -104,7 +104,7 @@ class VisibilityTests(PalShareTestCase):
     def test_private_profile_shows_the_header_and_nothing_else(self):
         self.asha.is_private = True
         self.asha.save(update_fields=["is_private"])
-        response = self.client.get(reverse("palshare:profile", args=["asha"]))
+        response = self.client.get(reverse("accounts:user-profile", args=["asha"]))
         self.assertContains(response, "This account is private")
         self.assertNotContains(response, "a public post")
 
@@ -112,7 +112,7 @@ class VisibilityTests(PalShareTestCase):
         self.asha.is_private = True
         self.asha.save(update_fields=["is_private"])
         Follow.objects.create(follower=self.bello, following=self.asha)
-        response = self.client.get(reverse("palshare:profile", args=["asha"]))
+        response = self.client.get(reverse("accounts:user-profile", args=["asha"]))
         self.assertContains(response, "a public post")
 
 

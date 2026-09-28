@@ -1,4 +1,4 @@
-{% extends "palshare/base.html" %}
+﻿{% extends "palshare/base.html" %}
 {% block title %}{{ post.author.name }}'s post{% endblock %}
 
 {% comment %}
@@ -16,7 +16,7 @@
 
     <form class="composer composer-inline" method="post" action="">
       {% csrf_token %}
-      <a class="avatar avatar-sm" href="{% url 'palshare:profile' current_user.username %}">{% include "palshare/partials/_avatar.html" with who=current_user %}</a>
+      <a class="avatar avatar-sm" href="{% url 'accounts:user-profile' current_user.username %}">{% include "palshare/partials/_avatar.html" with who=current_user %}</a>
       <div class="composer-body">
         <label class="visually-hidden" for="comment-text">Write a comment</label>
         <textarea id="comment-text" name="text" rows="1" placeholder="Write a comment"></textarea>

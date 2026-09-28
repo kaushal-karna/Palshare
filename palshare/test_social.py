@@ -1,4 +1,4 @@
-"""The six things QA reported after the media upload landed.
+﻿"""The six things QA reported after the media upload landed.
 
 Four of them were features that had never been built and two were defects in
 features that had. They are tested together because they were reported
@@ -82,7 +82,7 @@ class SocialTestCase(TestCase):
 class ProfileAccessTests(SocialTestCase):
 
     def test_another_persons_profile_opens(self):
-        response = self.client.get(reverse("palshare:profile", args=["asha"]))
+        response = self.client.get(reverse("accounts:user-profile", args=["asha"]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Asha")
 
@@ -90,7 +90,7 @@ class ProfileAccessTests(SocialTestCase):
         # Anyone created by `createsuperuser`, the admin or a fixture — which
         # in a workshop database is most people.
         User.objects.create_user("kaushal", password="pw")
-        response = self.client.get(reverse("palshare:profile", args=["kaushal"]))
+        response = self.client.get(reverse("accounts:user-profile", args=["kaushal"]))
         self.assertEqual(response.status_code, 200)
 
     def test_the_media_tab_shows_only_posts_with_files(self):
@@ -98,7 +98,7 @@ class ProfileAccessTests(SocialTestCase):
         with_media = Post.objects.create(author=self.other, text="with a picture")
         with_media.media.create(file="posts/x.png", kind="image")
 
-        body = self.client.get(reverse("palshare:profile", args=["asha"]),
+        body = self.client.get(reverse("accounts:user-profile", args=["asha"]),
                                {"tab": "media"}).content.decode()
 
         self.assertIn("with a picture", body)
@@ -109,7 +109,7 @@ class ProfileAccessTests(SocialTestCase):
         for i in range(3):
             post.media.create(file=f"posts/{i}.png", kind="image")
 
-        body = self.client.get(reverse("palshare:profile", args=["asha"]),
+        body = self.client.get(reverse("accounts:user-profile", args=["asha"]),
                                {"tab": "media"}).content.decode()
 
         self.assertEqual(body.count("three files"), 1)
@@ -119,14 +119,14 @@ class ProfileAccessTests(SocialTestCase):
         Like.objects.create(user=self.other, post=mine)
         Post.objects.create(author=self.other, text="their own post")
 
-        body = self.client.get(reverse("palshare:profile", args=["asha"]),
+        body = self.client.get(reverse("accounts:user-profile", args=["asha"]),
                                {"tab": "likes"}).content.decode()
 
         self.assertIn("they liked this", body)
         self.assertNotIn("their own post", body)
 
     def test_an_invented_tab_falls_back_to_posts(self):
-        response = self.client.get(reverse("palshare:profile", args=["asha"]),
+        response = self.client.get(reverse("accounts:user-profile", args=["asha"]),
                                    {"tab": "../../etc/passwd"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["tab"], "posts")
@@ -137,7 +137,7 @@ class ProfileAccessTests(SocialTestCase):
         Post.objects.create(author=self.other, text="secret")
 
         for tab in ("posts", "media", "likes"):
-            body = self.client.get(reverse("palshare:profile", args=["asha"]),
+            body = self.client.get(reverse("accounts:user-profile", args=["asha"]),
                                    {"tab": tab}).content.decode()
             self.assertNotIn("secret", body)
             self.assertIn("This account is private", body)
@@ -254,7 +254,7 @@ class AvatarTests(SocialTestCase):
 
     def test_the_picture_is_rendered_instead_of_the_initial(self):
         self.edit_profile(avatar=an_image())
-        body = self.client.get(reverse("palshare:profile", args=["bello"])).content.decode()
+        body = self.client.get(reverse("accounts:user-profile", args=["bello"])).content.decode()
         self.assertIn("avatars/", body)
         self.assertIn('class="avatar-img"', body)
 
@@ -272,7 +272,7 @@ class AvatarTests(SocialTestCase):
     def test_it_shows_up_on_other_peoples_screens_too(self):
         self.edit_profile(avatar=an_image())
         self.client.force_login(self.other)
-        body = self.client.get(reverse("palshare:profile", args=["bello"])).content.decode()
+        body = self.client.get(reverse("accounts:user-profile", args=["bello"])).content.decode()
         self.assertIn("avatars/", body)
 
     def test_saving_without_a_new_picture_keeps_the_old_one(self):
@@ -281,7 +281,7 @@ class AvatarTests(SocialTestCase):
         self.assertTrue(Profile.objects.get(user=self.me).avatar)
 
     def test_someone_with_no_picture_still_gets_their_initial(self):
-        body = self.client.get(reverse("palshare:profile", args=["asha"])).content.decode()
+        body = self.client.get(reverse("accounts:user-profile", args=["asha"])).content.decode()
         self.assertNotIn('class="avatar-img"', body)
         self.assertIn(">\n\n  A\n\n<", body)
 
@@ -455,7 +455,7 @@ class SearchTests(SocialTestCase):
         the right rail suggests the same person, and that is not a duplicate."""
         body = self.find("asha")
         section = body[body.index(">People<"):body.index(">Posts<")]
-        profile_url = reverse("palshare:profile", args=["asha"])
+        profile_url = reverse("accounts:user-profile", args=["asha"])
         self.assertEqual(section.count(f'href="{profile_url}"'), 2)  # avatar + name
 
     def test_posts_are_found_too(self):

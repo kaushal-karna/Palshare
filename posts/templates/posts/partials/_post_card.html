@@ -1,4 +1,4 @@
-{% comment %}
+﻿{% comment %}
   One post, used by the feed, the profile, saved posts and search results.
   Every list of posts in this app is a `{% templatetag openblock %} for {% templatetag closeblock %}`
   around this include and nothing else.
@@ -10,9 +10,9 @@
 <article class="post">
 
   <header class="post-head">
-    <a class="avatar" href="{% url 'palshare:profile' post.author.username %}">{% include "palshare/partials/_avatar.html" with who=post.author %}</a>
+    <a class="avatar" href="{% url 'accounts:user-profile' post.author.username %}">{% include "palshare/partials/_avatar.html" with who=post.author %}</a>
     <div class="post-who">
-      <a class="post-name" href="{% url 'palshare:profile' post.author.username %}">{{ post.author.name }}</a>
+      <a class="post-name" href="{% url 'accounts:user-profile' post.author.username %}">{{ post.author.name }}</a>
       <span class="post-meta">@{{ post.author.username }} · {{ post.age }}</span>
     </div>
     <a class="icon-link post-more" href="{% url 'palshare:post-detail' post.id %}" title="Open post">⋯</a>
