@@ -1,12 +1,6 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
+﻿"""Compatibility facade for project-level API routing."""
 
-from .api import PostViewSet, UserViewSet
+from config.api_urls import app_name, urlpatterns
 
-app_name = "palshare-api"
 
-router = DefaultRouter()
-router.register("posts", PostViewSet, basename="post")
-router.register("users", UserViewSet, basename="user")
-
-urlpatterns = [path("", include(router.urls))]
+__all__ = ["app_name", "urlpatterns"]

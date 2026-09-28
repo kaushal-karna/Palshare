@@ -1,4 +1,4 @@
-from django.conf import settings
+﻿from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
@@ -29,7 +29,7 @@ urlpatterns = [
     # API
     path(
         "api/palshare/",
-        include("palshare.api_urls"),
+        include(("config.api_urls", "palshare-api"), namespace="palshare-api"),
     ),
 
     # OpenAPI schema
