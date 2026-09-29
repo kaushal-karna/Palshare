@@ -2044,3 +2044,51 @@ body.bare {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- post options menu ----------------------------------------------- */
+.post-menu {
+  position: relative;
+  margin-left: auto;
+}
+
+.post-menu > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.post-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.post-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 30;
+  min-width: 8rem;
+  padding: 0.35rem;
+  background: var(--card-bg, var(--surface, #fff));
+  border: 1px solid var(--border, #ddd);
+  border-radius: 0.6rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.post-menu-panel a,
+.post-menu-panel button {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.post-menu-panel a:hover,
+.post-menu-panel button:hover {
+  background: rgba(127, 127, 127, 0.10);
+}

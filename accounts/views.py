@@ -56,17 +56,46 @@ class UserLoginView(LoginView):
 
 @login_required
 def profile_view(request):
-    profile = request.user.profile
+    owner = request.user
+
+    tab = request.GET.get("tab", "posts")
+    if tab not in {"posts", "media", "likes"}:
+        tab = "posts"
+
+    context = shell(
+        request,
+        active="profile",
+        posts=[],
+        tab=tab,
+        profile=PersonSerializer(
+            owner,
+            context={"request": request},
+        ).data,
+    )
+
+    posts = visible_posts(request.user)
+
+    if tab == "media":
+        posts = (
+            posts
+            .filter(
+                author=owner,
+                media__isnull=False,
+            )
+            .distinct()
+        )
+    elif tab == "likes":
+        posts = posts.filter(likes__user=owner)
+    else:
+        posts = posts.filter(author=owner)
+
+    context.update(posts_page(request, posts))
 
     return render(
         request,
         "accounts/profile.html",
-        {
-            "profile": profile,
-        },
+        context,
     )
-
-
 
 @login_required(login_url="accounts:login")
 @require_http_methods(["GET", "POST"])

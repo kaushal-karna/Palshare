@@ -190,3 +190,19 @@ def post_detail(request, pk):
 def saved(request):
     return render(request, "posts/saved.html", shell(
         request, active="saved", **posts_page(request, saved_posts(request.user))))
+
+@signed_in
+@require_http_methods(["POST"])
+def post_delete(request, pk):
+    post = get_object_or_404(visible_posts(request.user), pk=pk)
+
+    if post.author_id != request.user.id:
+        return HttpResponseForbidden("You can only delete things you created.")
+
+    post.delete()
+
+    next_url = request.POST.get("next", "").strip()
+    if next_url.startswith("/") and not next_url.startswith("//"):
+        return redirect(next_url)
+
+    return redirect("posts:feed")

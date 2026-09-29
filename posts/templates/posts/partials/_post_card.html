@@ -15,7 +15,22 @@
       <a class="post-name" href="{% url 'accounts:user-profile' post.author.username %}">{{ post.author.name }}</a>
       <span class="post-meta">@{{ post.author.username }} · {{ post.age }}</span>
     </div>
-    <a class="icon-link post-more" href="{% url 'posts:post-detail' post.id %}" title="Open post">⋯</a>
+    {% if post.author.username == current_user.username %}
+  <details class="post-menu">
+    <summary class="icon-link post-more" title="Post options">⋯</summary>
+    <div class="post-menu-panel">
+      <a href="{% url 'posts:post-edit' post.id %}">Edit</a>
+      <form method="post" action="{% url 'posts:post-delete' post.id %}"
+            onsubmit="return confirm('Delete this post?');">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit">Delete</button>
+      </form>
+    </div>
+  </details>
+{% else %}
+  <a class="icon-link post-more" href="{% url 'posts:post-detail' post.id %}" title="Open post">⋯</a>
+{% endif %}
   </header>
 
   <div class="post-body">
