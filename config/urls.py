@@ -1,4 +1,4 @@
-﻿from django.conf import settings
+from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
@@ -14,10 +14,16 @@ urlpatterns = [
     # Django admin
     path("admin/", admin.site.urls),
 
-    # Accounts urls live
+    # Domain HTML urls
     path("", include("accounts.urls")),
-    # Main Palshare application
-    path("", include("palshare.urls")),
+    path("", include("posts.urls")),
+    path("", include("connections.urls")),
+    path("", include("interactions.urls")),
+    path("", include("messaging.urls")),
+    path("", include("search.urls")),
+path("", include("integrations.urls")),
+
+    # Legacy Palshare URL compatibility
     path(
     "palshare/",
     include(
@@ -64,3 +70,4 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
+

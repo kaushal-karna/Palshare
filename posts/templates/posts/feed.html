@@ -1,4 +1,4 @@
-{% extends "palshare/base.html" %}
+{% extends "common/base.html" %}
 {% block title %}Home{% endblock %}
 
 {% comment %}
@@ -10,7 +10,7 @@
   Reads: posts (list), page_obj (optional)
 {% endcomment %}
 
-{% block nav %}{% with active="feed" %}{% include "palshare/partials/_nav.html" %}{% endwith %}{% endblock %}
+{% block nav %}{% with active="feed" %}{% include "common/partials/_nav.html" %}{% endwith %}{% endblock %}
 
 {% block content %}
   {% include "posts/partials/_composer.html" with action="" %}
@@ -26,10 +26,10 @@
         {% include "posts/partials/_post_card.html" %}
       {% endfor %}
     </div>
-    {% include "palshare/partials/_pagination.html" %}
+    {% include "common/partials/_pagination.html" %}
   {% else %}
     {% comment %}`{% templatetag openblock %} url %}` cannot be nested inside `with`, so resolve it first.{% endcomment %}
-    {% url 'palshare:search' as search_url %}
-    {% include "palshare/partials/_empty.html" with empty_title="Your feed is quiet" empty_text="Follow a few people and their posts land here." empty_action_url=search_url empty_action_label="Find people" %}
+    {% url 'search:search' as search_url %}
+    {% include "common/partials/_empty.html" with empty_title="Your feed is quiet" empty_text="Follow a few people and their posts land here." empty_action_url=search_url empty_action_label="Find people" %}
   {% endif %}
 {% endblock %}

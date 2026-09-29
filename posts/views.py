@@ -81,7 +81,7 @@ def feed(request):
             except ValidationError as exc:
                 for message in exc.messages:
                     messages.error(request, message)
-        return redirect("palshare:feed")
+        return redirect("posts:feed")
 
     posts = visible_posts(request.user)
     if request.GET.get("filter") == "following":
@@ -117,7 +117,7 @@ def post_create(request):
                 for message in exc.messages:
                     messages.error(request, message)
             else:
-                return redirect("palshare:post-detail", pk=post.pk)
+                return redirect("posts:post-detail", pk=post.pk)
         else:
             # A photo with no caption is a post. Empty is not.
             messages.error(request, "A post needs some text or a file.")
@@ -151,7 +151,7 @@ def post_edit(request, pk):
                 for message in exc.messages:
                     messages.error(request, message)
             else:
-                return redirect("palshare:post-detail", pk=post.pk)
+                return redirect("posts:post-detail", pk=post.pk)
         else:
             messages.error(request, "A post needs some text or a file.")
     return render(request, "posts/post_form.html", shell(
@@ -175,7 +175,7 @@ def post_detail(request, pk):
             if parent_id:
                 parent = get_object_or_404(Comment, pk=parent_id, post=post)
             add_comment(request.user, post, text, parent=parent)
-        return redirect("palshare:post-detail", pk=post.pk)
+        return redirect("posts:post-detail", pk=post.pk)
 
     comments = visible_comments(request.user, post)
     return render(request, "posts/post_detail.html", shell(
@@ -188,5 +188,5 @@ def post_detail(request, pk):
 
 @signed_in
 def saved(request):
-    return render(request, "palshare/saved.html", shell(
+    return render(request, "posts/saved.html", shell(
         request, active="saved", **posts_page(request, saved_posts(request.user))))

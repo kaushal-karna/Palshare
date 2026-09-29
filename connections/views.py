@@ -1,4 +1,4 @@
-﻿"""Connections HTML views."""
+"""Connections HTML views."""
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -25,7 +25,7 @@ def connections(request, username):
         queryset = User.objects.filter(followers__follower=owner)
     else:
         queryset = User.objects.filter(following__following=owner)
-    return render(request, "palshare/connections.html", shell(
+    return render(request, "connections/connections.html", shell(
         request,
         people=PersonRowSerializer(people(request.user, queryset), many=True,
                                 context={"request": request}).data,

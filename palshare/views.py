@@ -27,7 +27,7 @@ from django.template.defaultfilters import date as date_filter
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST, require_http_methods
-from .view_helpers import back, signed_in
+# from .view_helpers import back, signed_in
 from accounts.views import user_profile as profile
 from connections.views import connections, user_follow
 
@@ -71,11 +71,11 @@ from accounts.serializers import (
     initial,
 )
 
-from .serializers import (
-    CommentSerializer,
-    MessageSerializer,
-    PostSerializer,
-)
+# from .serializers import (
+#     CommentSerializer,
+#     MessageSerializer,
+#     PostSerializer,
+# )
 
 User = get_user_model()
 
@@ -90,67 +90,12 @@ PAGE_SIZE = 20
 
 # --- feed and posts -------------------------------------------------------
 
-@signed_in
-@require_http_methods(["GET", "POST"])
-
-
-@signed_in
-@require_http_methods(["GET", "POST"])
-
-
-@signed_in
-@require_http_methods(["GET", "POST"])
-
-
-@signed_in
-@require_http_methods(["GET", "POST"])
-
-
-
-
 # --- search ---------------------------------------------------------------
 
 # --- messaging ------------------------------------------------------------
 
 
 
-
-
-
-
-# --- integrations ---------------------------------------------------------
-
-@signed_in
-@require_http_methods(["GET", "POST"])
-def assistant(request):
-    """The conversation lives in the session, not the database.
-
-    Nothing in the schema stores assistant turns, and inventing a table for a
-    demo feature is how a schema grows things nobody maintains.
-    """
-    turns = request.session.get("assistant_turns", [])
-    error = None
-
-    if request.method == "POST":
-        prompt = request.POST.get("prompt", "").strip()
-        if prompt:
-            turns = turns + [{"role": "you", "text": prompt}]
-            reply = ask_assistant(prompt)
-            if reply is None:
-                # Two different failures wore one message, so "it does not
-                # work" was indistinguishable from "nobody has configured it".
-                # The first is a five-second fix and the page now says so.
-                if not settings.NVIDIA_API_KEY:
-                    error = ("The assistant has no API key. Set NVIDIA_API_KEY in .env "
-                             "and restart the server — see .env.example.")
-                else:
-                    error = "The assistant is unavailable right now. Try again in a moment."
-            else:
-                turns.append({"role": "assistant", "text": reply})
-            request.session["assistant_turns"] = turns[-20:]
-
-    return render(request, "palshare/assistant.html",
-                  shell(request, active="assistant", turns=turns, error=error))
 
 
 # --- the one-row-or-none actions -----------------------------------------
@@ -167,7 +112,7 @@ def assistant(request):
 
 
 # Temporary compatibility imports during domain extraction.
-from .view_helpers import shell
+# from .view_helpers import shell
 from posts.views import (
     feed,
     post_create,

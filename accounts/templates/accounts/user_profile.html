@@ -1,4 +1,4 @@
-{% extends "palshare/base.html" %}
+{% extends "common/base.html" %}
 {% block title %}{{ profile.name }}{% endblock %}
 
 {% comment %}
@@ -10,11 +10,11 @@
                   is_following,is_private,is_me}, posts (list)
 {% endcomment %}
 
-{% block nav %}{% with active="profile" %}{% include "palshare/partials/_nav.html" %}{% endwith %}{% endblock %}
+{% block nav %}{% with active="profile" %}{% include "common/partials/_nav.html" %}{% endwith %}{% endblock %}
 
 {% block content %}
   <header class="card profile-head">
-    <div class="avatar avatar-lg">{% include "palshare/partials/_avatar.html" with who=profile %}</div>
+    <div class="avatar avatar-lg">{% include "common/partials/_avatar.html" with who=profile %}</div>
 
     <div class="profile-id">
       <h1 class="profile-name">
@@ -31,8 +31,8 @@
           defaults to the followers tab — so "following" always showed you
           followers and the number never matched the list.
         {% endcomment %}
-        <a href="{% url 'palshare:connections' profile.username %}?tab=followers"><strong>{{ profile.followers }}</strong> followers</a>
-        <a href="{% url 'palshare:connections' profile.username %}?tab=following"><strong>{{ profile.following }}</strong> following</a>
+        <a href="{% url 'connections:connections' profile.username %}?tab=followers"><strong>{{ profile.followers }}</strong> followers</a>
+        <a href="{% url 'connections:connections' profile.username %}?tab=following"><strong>{{ profile.following }}</strong> following</a>
       </p>
     </div>
 
@@ -40,7 +40,7 @@
       {% if profile.is_me %}
         <a class="btn btn-quiet" href="{% url 'accounts:profile-edit' profile.username %}">Edit profile</a>
       {% else %}
-        <form method="post" action="{% url 'palshare:user-follow' profile.username %}">
+        <form method="post" action="{% url 'connections:user-follow' profile.username %}">
           {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
           <button class="btn {% if profile.is_following %}btn-quiet{% else %}btn-primary{% endif %}"
                   type="submit">
@@ -51,7 +51,7 @@
           A POST, not a link: opening a conversation creates a row the first
           time, and a GET that writes is a GET any crawler can trigger.
         {% endcomment %}
-        <form method="post" action="{% url 'palshare:message-user' profile.username %}">
+        <form method="post" action="{% url 'messaging:message-user' profile.username %}">
           {% csrf_token %}
           <button class="btn btn-quiet" type="submit">Message</button>
         </form>
@@ -60,7 +60,7 @@
   </header>
 
   {% if profile.is_private and not profile.is_following and not profile.is_me %}
-    {% include "palshare/partials/_empty.html" with empty_title="This account is private" empty_text="Follow to see their posts." %}
+    {% include "common/partials/_empty.html" with empty_title="This account is private" empty_text="Follow to see their posts." %}
   {% else %}
     {% comment %}
       `tab` comes from the view now. All three used to be hardcoded with Posts
@@ -78,14 +78,14 @@
           {% include "posts/partials/_post_card.html" %}
         {% endfor %}
       </div>
-      {% include "palshare/partials/_pagination.html" %}
+      {% include "common/partials/_pagination.html" %}
     {% else %}
       {% if tab == "media" %}
-        {% include "palshare/partials/_empty.html" with empty_title="No photos or video yet" %}
+        {% include "common/partials/_empty.html" with empty_title="No photos or video yet" %}
       {% elif tab == "likes" %}
-        {% include "palshare/partials/_empty.html" with empty_title="No liked posts yet" %}
+        {% include "common/partials/_empty.html" with empty_title="No liked posts yet" %}
       {% else %}
-        {% include "palshare/partials/_empty.html" with empty_title="No posts yet" %}
+        {% include "common/partials/_empty.html" with empty_title="No posts yet" %}
       {% endif %}
     {% endif %}
   {% endif %}

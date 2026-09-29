@@ -55,8 +55,10 @@ INSTALLED_APPS = [
     "posts.apps.PostsConfig",
     "messaging.apps.MessagingConfig",
     "interactions.apps.InteractionsConfig",
+    "integrations.apps.IntegrationsConfig",
     "connections.apps.ConnectionsConfig",
     "palshare.apps.PalShareConfig",
+    "common",
 ]
 
 MIDDLEWARE = [

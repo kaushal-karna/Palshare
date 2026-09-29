@@ -1,4 +1,4 @@
-﻿from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import login, logout as auth_logout
 from django.core.exceptions import ValidationError
@@ -14,7 +14,7 @@ from .forms import RegistrationForm, PrivacySettingsForm, ProfileEditForm
 from .services import update_privacy, update_profile
 
 from connections.queries import people
-from palshare.view_helpers import shell, signed_in
+from common.web import shell, signed_in
 from posts.views import posts_page
 from posts.queries import may_see_posts, visible_posts
 
@@ -35,7 +35,7 @@ def register_view(request):
         if form.is_valid():
             user=form.save()
             login(request, user)
-            return redirect("palshare:feed")
+            return redirect("posts:feed")
 
     else:
         form = RegistrationForm()

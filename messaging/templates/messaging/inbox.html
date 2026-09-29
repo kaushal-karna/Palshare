@@ -1,4 +1,4 @@
-{% extends "palshare/base.html" %}
+{% extends "common/base.html" %}
 {% block title %}Inbox{% endblock %}
 
 {% comment %}
@@ -9,7 +9,7 @@
   Reads: conversations (list of {id, person, last_message, unread, updated_at})
 {% endcomment %}
 
-{% block nav %}{% with active="inbox" %}{% include "palshare/partials/_nav.html" %}{% endwith %}{% endblock %}
+{% block nav %}{% with active="inbox" %}{% include "common/partials/_nav.html" %}{% endwith %}{% endblock %}
 {% block rail %}{% endblock %}
 
 {% block content %}
@@ -19,8 +19,8 @@
     <ul class="conversation-list card">
       {% for conversation in conversations %}
         <li class="conversation {% if conversation.unread %}conversation-unread{% endif %}">
-          <a class="conversation-link" href="{% url 'palshare:thread' conversation.id %}">
-            <span class="avatar">{% include "palshare/partials/_avatar.html" with who=conversation.person %}</span>
+          <a class="conversation-link" href="{% url 'messaging:thread' conversation.id %}">
+            <span class="avatar">{% include "common/partials/_avatar.html" with who=conversation.person %}</span>
             <span class="conversation-body">
               <span class="conversation-head">
                 <span class="user-name">{{ conversation.person.name }}</span>
@@ -34,6 +34,6 @@
       {% endfor %}
     </ul>
   {% else %}
-    {% include "palshare/partials/_empty.html" with empty_title="No messages" empty_text="Start a conversation from someone's profile." %}
+    {% include "common/partials/_empty.html" with empty_title="No messages" empty_text="Start a conversation from someone's profile." %}
   {% endif %}
 {% endblock %}

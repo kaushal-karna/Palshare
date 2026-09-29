@@ -1,4 +1,4 @@
-{% extends "palshare/base.html" %}
+{% extends "common/base.html" %}
 {% block title %}Search{% endblock %}
 
 {% comment %}
@@ -9,7 +9,7 @@
   Reads: query, people (list), posts (list)
 {% endcomment %}
 
-{% block nav %}{% with active="search" %}{% include "palshare/partials/_nav.html" %}{% endwith %}{% endblock %}
+{% block nav %}{% with active="search" %}{% include "common/partials/_nav.html" %}{% endwith %}{% endblock %}
 
 {% block content %}
   <form class="searchbar searchbar-page" action="" method="get" role="search">
@@ -26,7 +26,7 @@
     {% if people %}
       <ul class="user-list card">
         {% for person in people %}
-          {% include "palshare/partials/_user_row.html" %}
+          {% include "common/partials/_user_row.html" %}
         {% endfor %}
       </ul>
     {% else %}

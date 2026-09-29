@@ -1,0 +1,228 @@
+"""Tests migrated from palshare/test_views.py."""
+
+"""The HTML half: does every page render, and does it obey the rules?
+
+The contract these check is `demo.py` — the keys each template reads. A view is
+correct when its context has the same shape the shell was built against, which
+is why several of these assert on rendered markup rather than on a queryset.
+"""
+
+from django.contrib.auth import get_user_model
+
+from django.db import connection
+
+from django.test.utils import CaptureQueriesContext
+
+from django.test import TestCase
+
+from django.urls import reverse
+
+from accounts.models import Profile, User
+
+from posts.models import Comment, Post
+
+from messaging.models import Conversation
+
+from connections.models import Follow
+
+from interactions.models import Like, Save
+
+User = get_user_model()
+
+PASSWORD = "lab-passphrase-2026"
+
+class PalShareTestCase(TestCase):
+    """Two accounts and a handful of rows — the same fixture every test wants."""
+
+    def setUp(self):
+        self.asha = User.objects.create_user("asha", password=PASSWORD, first_name="Asha")
+        self.bello = User.objects.create_user("bello", password=PASSWORD, first_name="Bello")
+        self.asha_profile = Profile.objects.get(user=self.asha)
+        self.asha_profile.bio = "workshop"
+        self.asha_profile.save(update_fields=["bio"])
+        self.bello_profile = Profile.objects.get(user=self.bello)
+        self.public = Post.objects.create(author=self.asha, text="a public post")
+        self.private = Post.objects.create(author=self.asha, text="a followers-only post",
+                                           followers_only=True)
+        self.client.login(username="bello", password=PASSWORD)
+
+class PageTests(PalShareTestCase):
+    def test_every_page_renders(self):
+        urls = [
+            reverse("posts:feed"),
+            reverse("posts:post-create"),
+            reverse("posts:post-detail", args=[self.public.pk]),
+            reverse("accounts:user-profile", args=["asha"]),
+            reverse("accounts:profile-edit", args=["bello"]),
+            reverse("connections:connections", args=["asha"]),
+            reverse("posts:saved"),
+            reverse("search:search") + "?q=post",
+            reverse("messaging:inbox"),
+            reverse("integrations:assistant"),
+            reverse("accounts:settings"),
+        ]
+        for url in urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                # An unrendered tag means a context key the view forgot.
+                self.assertNotContains(response, "{{")
+                self.assertNotContains(response, "{%")
+
+    def test_pages_require_a_login_and_send_you_to_palshares_own(self):
+        self.client.logout()
+        response = self.client.get(reverse("posts:feed"))
+        self.assertRedirects(response, f"{reverse('accounts:login')}?next=/",)
+
+    def test_feed_shows_real_rows_not_demo_data(self):
+        response = self.client.get(reverse("posts:feed"))
+        self.assertContains(response, "a public post")
+        self.assertNotContains(response, "Menuka")  # demo.py's placeholder user
+
+    def test_post_card_gets_every_key_the_template_reads(self):
+        post = self.client.get(reverse("posts:feed")).context["posts"][0]
+        for key in ["id", "author", "age", "text", "media", "likes", "comments",
+                    "shares", "liked", "saved"]:
+            self.assertIn(key, post, f"`{key}` is in demo.py and _post_card.html reads it")
+        for key in ["id", "username", "name", "avatar"]:
+            self.assertIn(key, post["author"])
+
+class VisibilityTests(PalShareTestCase):
+    def test_followers_only_post_is_hidden_until_you_follow(self):
+        response = self.client.get(reverse("posts:feed"))
+        self.assertNotContains(response, "a followers-only post")
+
+        Follow.objects.create(follower=self.bello, following=self.asha)
+        response = self.client.get(reverse("posts:feed"))
+        self.assertContains(response, "a followers-only post")
+
+    def test_search_respects_visibility(self):
+        """Search is the classic way private data leaks."""
+        response = self.client.get(reverse("search:search"), {"q": "followers-only"})
+        self.assertNotContains(response, "a followers-only post")
+
+    def test_a_two_character_query_is_not_a_search(self):
+        response = self.client.get(reverse("search:search"), {"q": "a"})
+        self.assertEqual(response.context["posts"], [])
+        self.assertEqual(response.context["people"], [])
+
+    def test_private_profile_shows_the_header_and_nothing_else(self):
+        self.asha.is_private = True
+        self.asha.save(update_fields=["is_private"])
+        response = self.client.get(reverse("accounts:user-profile", args=["asha"]))
+        self.assertContains(response, "This account is private")
+        self.assertNotContains(response, "a public post")
+
+    def test_private_profile_opens_up_to_a_follower(self):
+        self.asha.is_private = True
+        self.asha.save(update_fields=["is_private"])
+        Follow.objects.create(follower=self.bello, following=self.asha)
+        response = self.client.get(reverse("accounts:user-profile", args=["asha"]))
+        self.assertContains(response, "a public post")
+
+class WriteTests(PalShareTestCase):
+    def test_the_composer_creates_a_post_and_redirects(self):
+        response = self.client.post(reverse("posts:feed"), {"text": "from the composer"})
+        self.assertRedirects(response, reverse("posts:feed"))
+        self.assertTrue(Post.objects.filter(text="from the composer",
+                                            author=self.bello).exists())
+
+    def test_a_post_is_authored_by_the_credential_not_the_form(self):
+        self.client.post(reverse("posts:post-create"),
+                         {"text": "mine", "author": self.asha.pk})
+        self.assertEqual(Post.objects.get(text="mine").author, self.bello)
+
+    def test_you_cannot_edit_someone_elses_post(self):
+        response = self.client.post(reverse("posts:post-edit", args=[self.public.pk]),
+                                    {"text": "hijacked"})
+        self.assertEqual(response.status_code, 403)
+        self.public.refresh_from_db()
+        self.assertEqual(self.public.text, "a public post")
+
+    def test_a_post_you_cannot_see_is_a_404_not_a_403(self):
+        """A 403 confirms the row exists. A 404 says nothing."""
+        response = self.client.get(reverse("posts:post-detail", args=[self.private.pk]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_commenting_bumps_the_counter_cache(self):
+        self.client.post(reverse("posts:post-detail", args=[self.public.pk]),
+                         {"text": "nice one"})
+        self.public.refresh_from_db()
+        self.assertEqual(self.public.comment_count, 1)
+        self.assertEqual(Comment.objects.filter(post=self.public).count(), 1)
+
+    def test_saved_page_lists_what_you_starred(self):
+        Save.objects.create(user=self.bello, post=self.public)
+        response = self.client.get(reverse("posts:saved"))
+        self.assertContains(response, "a public post")
+
+    def test_you_cannot_edit_someone_elses_profile(self):
+        response = self.client.post(reverse("accounts:profile-edit", args=["asha"]),
+                                    {"name": "Not Asha", "bio": ""})
+        self.assertEqual(response.status_code, 403)
+        self.asha.refresh_from_db()
+        self.assertEqual(self.asha.first_name, "Asha")
+
+    def test_the_privacy_switch_saves(self):
+        self.client.post(reverse("accounts:settings"), {"is_private": "on"})
+        self.bello.refresh_from_db()
+        self.assertTrue(self.bello.is_private)
+        self.client.post(reverse("accounts:settings"), {})
+        self.bello.refresh_from_db()
+        self.assertFalse(self.bello.is_private)
+
+class QueryCountTests(PalShareTestCase):
+    """The habit of measuring is the deliverable.
+
+    These numbers are allowed to change; what is not allowed is for them to
+    change *with the number of rows*, which is what each test actually pins.
+    """
+
+    def make_posts(self, n):
+        for i in range(n):
+            post = Post.objects.create(author=self.asha, text=f"post {i}")
+            Like.objects.create(user=self.bello, post=post)
+
+    def test_the_feed_costs_the_same_for_three_rows_and_thirty(self):
+        # Eight, not six. Both extra queries are per-page, not per-row, which
+        # is the property this test actually pins:
+        #   +1  the reactions prefetch, one query for every row on the page
+        #   +1  your own profile, read once by the header's avatar
+        # `request.user` arrives from the auth middleware without its profile,
+        # so that hop cannot be select_related away from here.
+        self.make_posts(3)
+        with self.assertNumQueries(8):
+            self.client.get(reverse("posts:feed"))
+        self.make_posts(27)
+        with self.assertNumQueries(8):
+            self.client.get(reverse("posts:feed"))
+
+    def test_search_does_not_pay_per_person(self):
+        """`profile.bio` is a OneToOne hop, which is an N+1 spelled as an
+        attribute access. `queries.people()` select_relates it away."""
+        def cost():
+            with CaptureQueriesContext(connection) as queries:
+                self.client.get(reverse("search:search"), {"q": "Findme"})
+            return len(queries)
+
+        for i in range(2):
+            user = User.objects.create_user(
+                f"early{i}",
+                first_name="Findme",
+            )
+            profile = Profile.objects.get(user=user)
+            profile.bio = "hello"
+            profile.save(update_fields=["bio"])
+
+        two_people = cost()
+
+        for i in range(10):
+            user = User.objects.create_user(
+                f"later{i}",
+                first_name="Findme",
+            )
+            profile = Profile.objects.get(user=user)
+            profile.bio = "hello"
+            profile.save(update_fields=["bio"])
+
+        self.assertEqual(cost(), two_people)

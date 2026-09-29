@@ -22,19 +22,19 @@ from interactions.services import (
 @require_POST
 def post_like(request, pk):
     toggle_like(request.user, get_object_or_404(visible_posts(request.user), pk=pk))
-    return back(request, "palshare:feed")
+    return back(request, "posts:feed")
 
 @signed_in
 @require_POST
 def post_save(request, pk):
     toggle_save(request.user, get_object_or_404(visible_posts(request.user), pk=pk))
-    return back(request, "palshare:feed")
+    return back(request, "posts:feed")
 
 @signed_in
 @require_POST
 def post_share(request, pk):
     toggle_share(request.user, get_object_or_404(visible_posts(request.user), pk=pk))
-    return back(request, "palshare:feed")
+    return back(request, "posts:feed")
 
 @signed_in
 @require_POST
@@ -47,7 +47,7 @@ def post_react(request, pk):
     except ValidationError as exc:
         for message in exc.messages:
             messages.error(request, message)
-    return back(request, reverse("palshare:post-detail", args=[post.pk]))
+    return back(request, reverse("posts:post-detail", args=[post.pk]))
 
 @signed_in
 @require_POST
@@ -56,4 +56,4 @@ def comment_like(request, pk):
     # You may only like a comment on a post you are allowed to read.
     get_object_or_404(visible_posts(request.user), pk=comment.post_id)
     toggle_comment_like(request.user, comment)
-    return back(request, reverse("palshare:post-detail", args=[comment.post_id]))
+    return back(request, reverse("posts:post-detail", args=[comment.post_id]))

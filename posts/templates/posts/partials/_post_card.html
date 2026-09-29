@@ -1,4 +1,4 @@
-﻿{% comment %}
+{% comment %}
   One post, used by the feed, the profile, saved posts and search results.
   Every list of posts in this app is a `{% templatetag openblock %} for {% templatetag closeblock %}`
   around this include and nothing else.
@@ -10,12 +10,12 @@
 <article class="post">
 
   <header class="post-head">
-    <a class="avatar" href="{% url 'accounts:user-profile' post.author.username %}">{% include "palshare/partials/_avatar.html" with who=post.author %}</a>
+    <a class="avatar" href="{% url 'accounts:user-profile' post.author.username %}">{% include "common/partials/_avatar.html" with who=post.author %}</a>
     <div class="post-who">
       <a class="post-name" href="{% url 'accounts:user-profile' post.author.username %}">{{ post.author.name }}</a>
       <span class="post-meta">@{{ post.author.username }} · {{ post.age }}</span>
     </div>
-    <a class="icon-link post-more" href="{% url 'palshare:post-detail' post.id %}" title="Open post">⋯</a>
+    <a class="icon-link post-more" href="{% url 'posts:post-detail' post.id %}" title="Open post">⋯</a>
   </header>
 
   <div class="post-body">
@@ -51,7 +51,7 @@
     Reads: post.reactions, a list of {emoji, label, count, mine} covering the
     whole palette, so the bar has the same five buttons on every post.
   {% endcomment %}
-  <form class="reactions" method="post" action="{% url 'palshare:post-react' post.id %}">
+  <form class="reactions" method="post" action="{% url 'interactions:post-react' post.id %}">
     {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
     {% for reaction in post.reactions %}
       <button class="reaction {% if reaction.mine %}reaction-on{% endif %}"
@@ -71,7 +71,7 @@
     and `next` brings you back to the page you pressed it on.
   {% endcomment %}
   <footer class="post-actions">
-    <form class="action-form" method="post" action="{% url 'palshare:post-like' post.id %}">
+    <form class="action-form" method="post" action="{% url 'interactions:post-like' post.id %}">
       {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
       <button class="action {% if post.liked %}action-on{% endif %}" type="submit"
               aria-pressed="{% if post.liked %}true{% else %}false{% endif %}"
@@ -79,8 +79,8 @@
         ♥ <span>{{ post.likes }}</span>
       </button>
     </form>
-    <a class="action" href="{% url 'palshare:post-detail' post.id %}">💬 <span>{{ post.comments }}</span></a>
-    <form class="action-form" method="post" action="{% url 'palshare:post-share' post.id %}">
+    <a class="action" href="{% url 'posts:post-detail' post.id %}">💬 <span>{{ post.comments }}</span></a>
+    <form class="action-form" method="post" action="{% url 'interactions:post-share' post.id %}">
       {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
       <button class="action {% if post.shared %}action-on{% endif %}" type="submit"
               aria-pressed="{% if post.shared %}true{% else %}false{% endif %}"
@@ -88,7 +88,7 @@
         ↻ <span>{{ post.shares }}</span>
       </button>
     </form>
-    <form class="action-form" method="post" action="{% url 'palshare:post-save' post.id %}">
+    <form class="action-form" method="post" action="{% url 'interactions:post-save' post.id %}">
       {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
       <button class="action action-end {% if post.saved %}action-on{% endif %}" type="submit"
               aria-pressed="{% if post.saved %}true{% else %}false{% endif %}"

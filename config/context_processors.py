@@ -1,5 +1,5 @@
 from accounts.serializers import PersonRowSerializer
-from palshare.integrations import current_weather
+from integrations.services import current_weather
 from interactions.models import Reaction
 from connections.queries import suggestions_for
 

@@ -13,7 +13,6 @@ from connections.urls import urlpatterns as connections_urlpatterns
 from messaging.urls import urlpatterns as messaging_urlpatterns
 from posts.urls import urlpatterns as posts_urlpatterns
 from search.urls import urlpatterns as search_urlpatterns
-from palshare.views import assistant
 
 
 app_name = "palshare"
@@ -30,11 +29,6 @@ urlpatterns = (
             "u/<str:username>/",
             user_profile,
             name="profile",
-        ),
-        path(
-            "assistant/",
-            assistant,
-            name="assistant",
         ),
     ]
 )

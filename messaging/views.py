@@ -1,4 +1,4 @@
-﻿from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.contrib import messages
@@ -15,8 +15,8 @@ from messaging.queries import conversations_for
 from messaging.serializers import MessageSerializer
 from messaging.services import conversation_with, edit_message, unsend_message
 
-from palshare.serializers import date_filter
-from palshare.view_helpers import back, shell, signed_in
+from django.template.defaultfilters import date as date_filter
+from common.web import back, shell, signed_in
 
 
 def when(moment):
@@ -56,7 +56,7 @@ def thread(request, pk):
             # `Meta.ordering` sorts the inbox by `updated_at`, which only means
             # anything if sending a message touches it.
             conversation.save(update_fields=["updated_at"])
-        return redirect("palshare:thread", pk=conversation.pk)
+        return redirect("messaging:thread", pk=conversation.pk)
 
     unread = conversation.messages.exclude(sender=request.user).filter(read_at__isnull=True)
     unread.update(read_at=timezone.now())
@@ -112,7 +112,7 @@ def message_edit(request, pk):
     except ValidationError as exc:
         for text in exc.messages:
             messages.error(request, text)
-    return redirect("palshare:thread", pk=message.conversation_id)
+    return redirect("messaging:thread", pk=message.conversation_id)
 
 @signed_in
 @require_POST
@@ -124,7 +124,7 @@ def message_unsend(request, pk):
     except ValidationError as exc:
         for text in exc.messages:
             messages.error(request, text)
-    return redirect("palshare:thread", pk=message.conversation_id)
+    return redirect("messaging:thread", pk=message.conversation_id)
 
 @signed_in
 @require_POST
@@ -142,6 +142,6 @@ def message_user(request, username):
     other = get_object_or_404(User, username=username)
     if other == request.user:
         messages.error(request, "You cannot message yourself.")
-        return redirect("palshare:inbox")
+        return redirect("messaging:inbox")
     conversation = conversation_with(request.user, other)
-    return redirect("palshare:thread", pk=conversation.pk)
+    return redirect("messaging:thread", pk=conversation.pk)

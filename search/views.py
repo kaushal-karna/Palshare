@@ -1,9 +1,9 @@
-﻿from django.shortcuts import render
+from django.shortcuts import render
 
 from accounts.serializers import PersonRowSerializer
 from posts.serializers import PostSerializer
 from search.queries import search as search_query
-from palshare.view_helpers import shell, signed_in
+from common.web import shell, signed_in
 
 
 def search(request):
@@ -17,5 +17,3 @@ def search(request):
         posts=PostSerializer(results["posts"], many=True,
                              context={"request": request}).data,
     ))
-
-

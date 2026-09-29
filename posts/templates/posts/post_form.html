@@ -1,4 +1,4 @@
-{% extends "palshare/base.html" %}
+{% extends "common/base.html" %}
 {% block title %}{{ heading|default:"New post" }}{% endblock %}
 
 {% comment %}
@@ -19,7 +19,7 @@
         <label for="id_text">Post</label>
         <textarea id="id_text" name="text" rows="6" autofocus
                   placeholder="What are you working on?">{{ post.text|default:'' }}</textarea>
-        {% include "palshare/partials/_emoji_picker.html" with target="id_text" %}
+        {% include "common/partials/_emoji_picker.html" with target="id_text" %}
       </div>
 
       <div class="field">
@@ -35,7 +35,7 @@
 
       <div class="form-actions">
         <button class="btn btn-primary" type="submit">{% if post %}Save changes{% else %}Post{% endif %}</button>
-        <a class="btn btn-quiet" href="{% url 'palshare:feed' %}">Cancel</a>
+        <a class="btn btn-quiet" href="{% url 'posts:feed' %}">Cancel</a>
       </div>
     </form>
   </section>

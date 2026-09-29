@@ -1,4 +1,4 @@
-﻿{% extends "palshare/base.html" %}
+{% extends "common/base.html" %}
 {% block title %}{{ conversation.person.name }}{% endblock %}
 
 {% comment %}
@@ -15,13 +15,13 @@
   the day every message flips sides.
 {% endcomment %}
 
-{% block nav %}{% with active="inbox" %}{% include "palshare/partials/_nav.html" %}{% endwith %}{% endblock %}
+{% block nav %}{% with active="inbox" %}{% include "common/partials/_nav.html" %}{% endwith %}{% endblock %}
 {% block rail %}{% endblock %}
 
 {% block content %}
   <header class="thread-head card">
-    <a class="icon-link" href="{% url 'palshare:inbox' %}" title="Back to inbox">←</a>
-    <a class="avatar" href="{% url 'accounts:user-profile' conversation.person.username %}">{% include "palshare/partials/_avatar.html" with who=conversation.person %}</a>
+    <a class="icon-link" href="{% url 'messaging:inbox' %}" title="Back to inbox">←</a>
+    <a class="avatar" href="{% url 'accounts:user-profile' conversation.person.username %}">{% include "common/partials/_avatar.html" with who=conversation.person %}</a>
     <div>
       <a class="user-name" href="{% url 'accounts:user-profile' conversation.person.username %}">{{ conversation.person.name }}</a>
       <p class="post-meta">@{{ conversation.person.username }}</p>
@@ -42,13 +42,13 @@
               <p class="bubble-unsent">This message was unsent.</p>
             {% elif editing == message.id|stringformat:"s" and message.mine %}
               <form class="bubble-edit" method="post"
-                    action="{% url 'palshare:message-edit' message.id %}">
+                    action="{% url 'messaging:message-edit' message.id %}">
                 {% csrf_token %}
                 <label class="visually-hidden" for="edit-{{ message.id }}">Edit message</label>
                 <textarea id="edit-{{ message.id }}" name="text" rows="2" autofocus>{{ message.text }}</textarea>
                 <div class="bubble-actions">
                   <button class="btn btn-primary btn-sm" type="submit">Save</button>
-                  <a class="btn btn-quiet btn-sm" href="{% url 'palshare:thread' conversation.id %}">Cancel</a>
+                  <a class="btn btn-quiet btn-sm" href="{% url 'messaging:thread' conversation.id %}">Cancel</a>
                 </div>
               </form>
             {% else %}
@@ -64,7 +64,7 @@
                 {% endcomment %}
                 <div class="bubble-actions">
                   <a class="link-button" href="?edit={{ message.id }}#m{{ message.id }}">Edit</a>
-                  <form method="post" action="{% url 'palshare:message-unsend' message.id %}">
+                  <form method="post" action="{% url 'messaging:message-unsend' message.id %}">
                     {% csrf_token %}
                     <button class="link-button" type="submit">Unsend</button>
                   </form>
@@ -84,11 +84,10 @@
     <div class="composer-body">
       <label class="visually-hidden" for="message-text">Message</label>
       <textarea id="message-text" name="text" rows="1" placeholder="Write a message"></textarea>
-      {% include "palshare/partials/_emoji_picker.html" with target="message-text" %}
+      {% include "common/partials/_emoji_picker.html" with target="message-text" %}
       <div class="composer-actions">
         <button class="btn btn-primary btn-sm" type="submit">Send</button>
       </div>
     </div>
   </form>
 {% endblock %}
-

@@ -1,10 +1,10 @@
-﻿{% comment %}
+{% comment %}
   One comment, and its replies, one level deep. Recursion past one level is a
   design decision nobody has made yet, so the template does not offer it.
   Reads: comment.{id,author,age,text,likes,replies}
 {% endcomment %}
 <li class="comment">
-  <a class="avatar avatar-sm" href="{% url 'accounts:user-profile' comment.author.username %}">{% include "palshare/partials/_avatar.html" with who=comment.author %}</a>
+  <a class="avatar avatar-sm" href="{% url 'accounts:user-profile' comment.author.username %}">{% include "common/partials/_avatar.html" with who=comment.author %}</a>
 
   <div class="comment-body">
     <p class="comment-head">
@@ -13,7 +13,7 @@
     </p>
     <p>{{ comment.text }}</p>
     <p class="comment-actions">
-      <form class="action-form" method="post" action="{% url 'palshare:comment-like' comment.id %}">
+      <form class="action-form" method="post" action="{% url 'interactions:comment-like' comment.id %}">
         {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
         <button class="link-button {% if comment.liked %}action-on{% endif %}" type="submit">
           {% if comment.liked %}Liked{% else %}Like{% endif %}{% if comment.likes %} · {{ comment.likes }}{% endif %}
@@ -29,7 +29,7 @@
     <details class="comment-reply">
       <summary class="link-button">Reply</summary>
       <form class="composer composer-inline" method="post"
-            action="{% url 'palshare:post-detail' comment.post %}">
+            action="{% url 'posts:post-detail' comment.post %}">
         {% csrf_token %}
         <input type="hidden" name="parent" value="{{ comment.id }}">
         <div class="composer-body">
@@ -47,7 +47,7 @@
       <ul class="comment-list comment-replies">
         {% for reply in comment.replies %}
           <li class="comment">
-            <a class="avatar avatar-sm" href="{% url 'accounts:user-profile' reply.author.username %}">{% include "palshare/partials/_avatar.html" with who=reply.author %}</a>
+            <a class="avatar avatar-sm" href="{% url 'accounts:user-profile' reply.author.username %}">{% include "common/partials/_avatar.html" with who=reply.author %}</a>
             <div class="comment-body">
               <p class="comment-head">
                 <span class="comment-name">{{ reply.author.name }}</span>

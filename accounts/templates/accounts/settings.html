@@ -1,4 +1,4 @@
-{% extends "palshare/base.html" %}
+{% extends "common/base.html" %}
 {% block title %}Settings{% endblock %}
 
 {% comment %}
@@ -9,7 +9,7 @@
   on the internet, and Django's own admin stopped accepting it for that reason.
 {% endcomment %}
 
-{% block nav %}{% with active="settings" %}{% include "palshare/partials/_nav.html" %}{% endwith %}{% endblock %}
+{% block nav %}{% with active="settings" %}{% include "common/partials/_nav.html" %}{% endwith %}{% endblock %}
 {% block rail %}{% endblock %}
 
 {% block content %}

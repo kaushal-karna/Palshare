@@ -1,4 +1,4 @@
-﻿{% extends "palshare/base.html" %}
+{% extends "common/base.html" %}
 {% block title %}Edit profile{% endblock %}
 
 {% comment %}Feature 8. Reads: profile{% endcomment %}
@@ -30,7 +30,7 @@
           only way to find out whether an upload worked is to leave the page.
         {% endcomment %}
         <div class="avatar-preview">
-          <span class="avatar avatar-lg">{% include "palshare/partials/_avatar.html" with who=profile %}</span>
+          <span class="avatar avatar-lg">{% include "common/partials/_avatar.html" with who=profile %}</span>
           {% if not profile.avatar_url %}
             <span class="helptext">No picture yet — your initial is used instead.</span>
           {% endif %}
@@ -46,4 +46,3 @@
     </form>
   </section>
 {% endblock %}
-

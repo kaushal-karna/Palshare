@@ -1,4 +1,4 @@
-﻿from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 
 from django.test import TestCase
 from django.urls import reverse
@@ -30,7 +30,7 @@ class ConnectionActionTestCase(TestCase):
             username="bello",
             password=PASSWORD,
         )
-        self.feed = reverse("palshare:feed")
+        self.feed = reverse("posts:feed")
 
     def press(self, name, args, **data):
         return self.client.post(
@@ -41,20 +41,20 @@ class ConnectionActionTestCase(TestCase):
 
 class FollowActionTests(ConnectionActionTestCase):
     def test_follow_toggles(self):
-        self.press("palshare:user-follow", ["asha"])
+        self.press("connections:user-follow", ["asha"])
         self.assertEqual(Follow.objects.count(), 1)
-        self.press("palshare:user-follow", ["asha"])
+        self.press("connections:user-follow", ["asha"])
         self.assertEqual(Follow.objects.count(), 0)
 
     def test_following_yourself_is_refused_with_a_sentence(self):
-        response = self.client.post(reverse("palshare:user-follow", args=["bello"]),
+        response = self.client.post(reverse("connections:user-follow", args=["bello"]),
                                     {"next": self.feed}, follow=True)
         self.assertEqual(Follow.objects.count(), 0)
         self.assertContains(response, "You cannot follow yourself")
 
     def test_the_follow_button_is_absent_from_your_own_row(self):
-        body = self.client.get(reverse("palshare:search"), {"q": "bello"}).content.decode()
-        self.assertNotIn(reverse("palshare:user-follow", args=["bello"]), body)
+        body = self.client.get(reverse("search:search"), {"q": "bello"}).content.decode()
+        self.assertNotIn(reverse("connections:user-follow", args=["bello"]), body)
 
 
 class ProfileConnectionTests(ConnectionActionTestCase):
@@ -63,7 +63,7 @@ class ProfileConnectionTests(ConnectionActionTestCase):
         """They were the same bare URL, and `connections` defaults to
         followers — so "following" showed you followers."""
         body = self.client.get(reverse("accounts:user-profile", args=["asha"])).content.decode()
-        base = reverse("palshare:connections", args=["asha"])
+        base = reverse("connections:connections", args=["asha"])
         self.assertIn(f'href="{base}?tab=followers"', body)
         self.assertIn(f'href="{base}?tab=following"', body)
 
@@ -71,7 +71,7 @@ class ProfileConnectionTests(ConnectionActionTestCase):
         third = User.objects.create_user("menuka", password="pw")
         Follow.objects.create(follower=self.other, following=third)
 
-        body = self.client.get(reverse("palshare:connections", args=["asha"]),
+        body = self.client.get(reverse("connections:connections", args=["asha"]),
                                {"tab": "following"}).content.decode()
 
         self.assertIn("menuka", body)
