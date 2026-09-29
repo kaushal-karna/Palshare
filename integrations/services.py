@@ -142,9 +142,10 @@ def ask_assistant(prompt):
         "model": settings.NVIDIA_MODEL,
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 300,
-        "temperature": 0.2,
-        "reasoning_effort": "low",
+        "temperature": 0.7,
+        "top_p": 0.95,
         "stream": False,
+        "chat_template_kwargs": {"enable_thinking": False},
     }
 
     try:
