@@ -1,51 +1,40 @@
-"""Routes for PalShare.
+"""Compatibility URL facade.
 
-This file used to be `TemplateView.as_view(template_name=..., extra_context=...)`
-on every line, with `demo.py` supplying the context. Each of those lines has now
-been swapped for a real view — and that is all that changed. Every URL, every
-route name and every template is exactly what it was, which is why no template
-needed editing when the backend landed.
-
-`demo.py` is still here for one more commit, as the written contract these views
-are checked against. It has no importer left; delete it once the room has seen
-the two side by side.
+Canonical route ownership lives in the domain applications.
+This module only preserves the legacy ``palshare:`` namespace while
+existing templates/tests are migrated.
 """
 
 from django.urls import path
 
-from . import views
-from interactions import views as interaction_views
-from posts.urls import urlpatterns as posts_urlpatterns
+from accounts.views import user_profile
+from interactions.urls import urlpatterns as interactions_urlpatterns
 from connections.urls import urlpatterns as connections_urlpatterns
+from messaging.urls import urlpatterns as messaging_urlpatterns
+from posts.urls import urlpatterns as posts_urlpatterns
+from search.urls import urlpatterns as search_urlpatterns
+from palshare.views import assistant
+
 
 app_name = "palshare"
 
-urlpatterns = posts_urlpatterns + connections_urlpatterns + [
-    # Feed and posts
 
-    # The one-row-or-none actions. POST only, and every one of them returns
-    # you to the page whose button you pressed.
-    path("posts/<int:pk>/like/", interaction_views.post_like, name="post-like"),
-    path("posts/<int:pk>/save/", interaction_views.post_save, name="post-save"),
-    path("posts/<int:pk>/share/", interaction_views.post_share, name="post-share"),
-    path("comments/<int:pk>/like/", interaction_views.comment_like, name="comment-like"),
-    path("posts/<int:pk>/react/", interaction_views.post_react, name="post-react"),
-
-    # Profile and the follow graph
-    path("u/<str:username>/", views.profile, name="profile"),
-    path("u/<str:username>/message/", views.message_user, name="message-user"),
-
-    # Saved, search
-    path("saved/", views.saved, name="saved"),
-    path("search/", views.search, name="search"),
-
-    # Messaging
-    path("inbox/", views.inbox, name="inbox"),
-    path("inbox/<int:pk>/", views.thread, name="thread"),
-    path("messages/<int:pk>/edit/", views.message_edit, name="message-edit"),
-    path("messages/<int:pk>/unsend/", views.message_unsend, name="message-unsend"),
-
-    # Integrations
-    path("assistant/", views.assistant, name="assistant"),
-
-]
+urlpatterns = (
+    posts_urlpatterns
+    + connections_urlpatterns
+    + interactions_urlpatterns
+    + messaging_urlpatterns
+    + search_urlpatterns
+    + [
+        path(
+            "u/<str:username>/",
+            user_profile,
+            name="profile",
+        ),
+        path(
+            "assistant/",
+            assistant,
+            name="assistant",
+        ),
+    ]
+)

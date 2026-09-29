@@ -4,6 +4,9 @@ from django.urls import path
 
 from . import views
 
+
+app_name = "connections"
+
 urlpatterns = [
     path(
         "u/<str:username>/connections/",

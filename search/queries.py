@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+﻿from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from connections.queries import people
@@ -10,7 +10,7 @@ User = get_user_model()
 
 def search(user, q):
     q = q.strip()
-    if len(q) < 2:
+    if len(q) < 3:
         # Two characters is not a search, it is a table scan. The page has an
         # empty state for exactly this.
         return {"query": q, "people": [], "posts": []}
