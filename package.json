@@ -1,0 +1,19 @@
+{
+  "name": "palshare-ui-ux",
+  "version": "1.0.0",
+  "description": "> **A Django-powered social platform built from the ground up — and then rebuilt from the inside out.** 💙\r >\r > Palshare is a personal learning, engineering, and architecture journey: authentication, profiles, posts, media, follows, interactions, search, messaging, REST APIs, AI integration, weather integration, PostgreSQL, testing, and a deliberate refactoring effort to grow a once-centralized Django application into a clean domain-oriented platform.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tailwindcss -i ./common/static/common/src/app.css -o ./common/static/common/dist/app.css",
+    "dev": "tailwindcss -i ./common/static/common/src/app.css -o ./common/static/common/dist/app.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

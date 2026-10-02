@@ -1,0 +1,121 @@
+﻿@import "tailwindcss";
+
+/*
+ * PalShare design tokens
+ *
+ * These map the existing PalShare CSS variables into Tailwind.
+ * The existing palshare.css remains the source of truth for now.
+ *
+ * Because this uses `inline`, Tailwind utilities reference the
+ * existing runtime variables directly, including dark-mode values.
+ */
+
+@theme inline {
+  --font-pal: var(--font);
+
+  --color-pal-bg: var(--bg);
+  --color-pal-surface: var(--surface);
+  --color-pal-surface-2: var(--surface-2);
+
+  --color-pal-border: var(--border);
+
+  --color-pal-text: var(--text);
+  --color-pal-muted: var(--muted);
+
+  --color-pal-accent: var(--accent);
+  --color-pal-accent-ink: var(--accent-ink);
+
+  --color-pal-danger: var(--danger);
+  --color-pal-ok: var(--ok);
+
+  --radius-pal: var(--radius);
+  --radius-pal-sm: var(--radius-sm);
+
+  --shadow-pal: var(--shadow);
+}
+
+
+@layer components {
+  .emoji-picker-wrap {
+    position: relative;
+  }
+
+  .emoji-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .emoji-trigger:hover {
+    background: var(--surface-2);
+    transform: translateY(-1px);
+  }
+
+  .emoji-trigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .emoji-picker-wrap .emoji-picker {
+    position: absolute;
+    z-index: 50;
+    left: 0;
+    bottom: calc(100% + 0.5rem);
+
+    display: grid;
+    grid-template-columns: repeat(8, minmax(2rem, 1fr));
+    gap: 0.2rem;
+
+    min-width: 18rem;
+    max-width: min(20rem, calc(100vw - 2rem));
+    padding: 0.55rem;
+
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--surface);
+    box-shadow:
+      0 12px 30px rgba(16, 24, 40, 0.14);
+
+    transform-origin: bottom left;
+  }
+
+  .emoji-picker-wrap .emoji-key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 2rem;
+    min-height: 2rem;
+
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+
+    font-size: 1.2rem;
+    cursor: pointer;
+
+    transition:
+      background-color 120ms ease,
+      transform 120ms ease;
+  }
+
+  .emoji-picker-wrap .emoji-key:hover {
+    background: var(--surface-2);
+    transform: scale(1.08);
+  }
+
+  .emoji-picker-wrap .emoji-key:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+}
