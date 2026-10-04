@@ -1,14 +1,17 @@
-﻿@import "tailwindcss";
-
-/*
- * PalShare design tokens
+﻿/*
+ * PalShare UI foundation
  *
- * These map the existing PalShare CSS variables into Tailwind.
- * The existing palshare.css remains the source of truth for now.
- *
- * Because this uses `inline`, Tailwind utilities reference the
- * existing runtime variables directly, including dark-mode values.
+ * Tailwind is the new UI layer.
+ * The existing stylesheet is imported as a legacy layer so we can
+ * migrate page-by-page without breaking the working application.
  */
+
+@import "../palshare.css" layer(legacy);
+@import "tailwindcss";
+
+/* -------------------------------------------------------------------------
+   Tailwind design tokens
+   ------------------------------------------------------------------------- */
 
 @theme inline {
   --font-pal: var(--font);
@@ -34,8 +37,166 @@
   --shadow-pal: var(--shadow);
 }
 
+/* -------------------------------------------------------------------------
+   Three-state theme system
+
+   No data-theme attribute = Default = follow operating-system preference.
+   data-theme="light"       = explicit Light mode.
+   data-theme="dark"        = explicit Dark mode.
+   ------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+
+  --border: #dfe3e8;
+
+  --text: #14181f;
+  --muted: #6b7280;
+
+  --accent: #6558f5;
+  --accent-ink: #ffffff;
+
+  --danger: #b91c1c;
+  --ok: #15803d;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+
+  --shadow:
+    0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0f1115;
+  --surface: #171a21;
+  --surface-2: #1f232c;
+
+  --border: #2a2f3a;
+
+  --text: #e6e8eb;
+  --muted: #9aa3b2;
+
+  --accent: #8176ff;
+  --accent-ink: #ffffff;
+
+  --danger: #b91c1c;
+  --ok: #15803d;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+
+  --shadow: none;
+}
+
+/* -------------------------------------------------------------------------
+   Theme menu
+   ------------------------------------------------------------------------- */
 
 @layer components {
+  .theme-menu {
+    position: relative;
+  }
+
+  .theme-menu > summary {
+    list-style: none;
+  }
+
+  .theme-menu > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .theme-menu[open] > summary {
+    background: var(--surface-2);
+  }
+
+  .theme-menu-panel {
+    position: absolute;
+    top: calc(100% + 0.65rem);
+    right: 0;
+    z-index: 120;
+
+    width: min(14rem, calc(100vw - 2rem));
+
+    padding: 0.45rem;
+
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+
+    background: var(--surface);
+
+    box-shadow:
+      0 18px 45px rgba(16, 24, 40, 0.16);
+  }
+
+  .theme-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+
+    padding: 0.7rem 0.8rem;
+
+    border: 0;
+    border-radius: 0.75rem;
+
+    background: transparent;
+    color: var(--text);
+
+    font: inherit;
+    text-align: left;
+
+    cursor: pointer;
+  }
+
+  .theme-option:hover {
+    background: var(--surface-2);
+  }
+
+  .theme-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .theme-option[aria-checked="true"] {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .theme-option-check {
+    opacity: 0;
+  }
+
+  .theme-option[aria-checked="true"] .theme-option-check {
+    opacity: 1;
+  }
+
+  .theme-menu-label {
+    display: block;
+
+    padding: 0.45rem 0.7rem 0.35rem;
+
+    color: var(--muted);
+
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Existing emoji picker styles remain available during migration. */
+
   .emoji-picker-wrap {
     position: relative;
   }
@@ -44,13 +205,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     width: 2.25rem;
     height: 2.25rem;
+
     border: 0;
     border-radius: 999px;
+
     background: transparent;
     color: var(--text);
+
     cursor: pointer;
+
     transition:
       background-color 150ms ease,
       transform 150ms ease;
@@ -69,6 +235,7 @@
   .emoji-picker-wrap .emoji-picker {
     position: absolute;
     z-index: 50;
+
     left: 0;
     bottom: calc(100% + 0.5rem);
 
@@ -78,11 +245,14 @@
 
     min-width: 18rem;
     max-width: min(20rem, calc(100vw - 2rem));
+
     padding: 0.55rem;
 
     border: 1px solid var(--border);
     border-radius: 1rem;
+
     background: var(--surface);
+
     box-shadow:
       0 12px 30px rgba(16, 24, 40, 0.14);
 
@@ -99,6 +269,7 @@
 
     border: 0;
     border-radius: 0.6rem;
+
     background: transparent;
 
     font-size: 1.2rem;
