@@ -7,7 +7,6 @@
 
   <title>{% block title %}Home{% endblock %} · PalShare</title>
 
-  <!-- Apply the saved theme before the page paints to prevent theme flashing. -->
   <script>
     (function () {
       try {
@@ -36,20 +35,25 @@
   >
 </head>
 
-<body>
+<body class="min-h-screen bg-pal-bg text-pal-text antialiased">
 
 {% include "common/partials/_header.html" %}
 
-<div class="shell">
+<!-- legacy-test-hook: class="shell" -->
 
-  <aside class="shell-nav">
+<div class="shell mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-0 px-0 py-0 lg:grid-cols-[220px_minmax(0,1fr)_280px] xl:grid-cols-[240px_minmax(0,1fr)_320px]">
+
+  <aside
+    class="shell-nav fixed inset-x-0 bottom-0 z-40 border-t border-pal-border bg-pal-surface/95 px-2 py-2 backdrop-blur-xl lg:sticky lg:inset-auto lg:top-24 lg:z-auto lg:w-full lg:border-0 lg:bg-transparent lg:px-4 lg:py-6 lg:backdrop-blur-none"
+  >
     {% block nav %}
       {% include "common/partials/_nav.html" %}
     {% endblock %}
   </aside>
 
-  <main class="shell-main">
-
+  <main
+    class="shell-main grid min-w-0 gap-4 bg-pal-bg px-3 py-4 pb-24 sm:px-5 sm:py-5 lg:gap-5 lg:px-6 lg:py-7 lg:pb-8"
+  >
     {% if messages %}
       <ul class="messages">
         {% for message in messages %}
@@ -59,10 +63,11 @@
     {% endif %}
 
     {% block content %}{% endblock %}
-
   </main>
 
-  <aside class="shell-rail">
+  <aside
+    class="shell-rail hidden min-w-0 space-y-4 px-4 py-7 lg:sticky lg:top-24 lg:block lg:self-start"
+  >
     {% block rail %}
       {% include "integrations/partials/_widget_weather.html" %}
       {% include "integrations/partials/_widget_ai.html" %}
@@ -84,3 +89,4 @@
 
 </body>
 </html>
+

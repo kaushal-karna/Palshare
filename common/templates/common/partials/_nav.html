@@ -1,19 +1,125 @@
-{% comment %}
-  Left column. `nav-item-active` is set by each page through the `active`
-  context variable, so there is one nav and no per-page copies of it.
-  Reads: active (string), current_user
+﻿{% comment %}
+  Responsive PalShare navigation.
+
+  Desktop:
+    Vertical sidebar with labels and icons.
+
+  Mobile:
+    Fixed bottom navigation with compact labels.
+
+  Reads:
+    active (string)
+    current_user
 {% endcomment %}
-<nav class="nav">
-  <a class="nav-item {% if active == 'feed' %}nav-item-active{% endif %}" href="{% url 'posts:feed' %}">Home</a>
-  <a class="nav-item {% if active == 'search' %}nav-item-active{% endif %}" href="{% url 'search:search' %}">Search</a>
-  <a class="nav-item {% if active == 'inbox' %}nav-item-active{% endif %}" href="{% url 'messaging:inbox' %}">Inbox</a>
-  <a class="nav-item {% if active == 'saved' %}nav-item-active{% endif %}" href="{% url 'posts:saved' %}">Saved</a>
-  <a class="nav-item {% if active == 'assistant' %}nav-item-active{% endif %}" href="{% url 'integrations:assistant' %}">Assistant</a>
+
+<nav
+  class="nav flex w-full items-center gap-1 overflow-x-auto rounded-none bg-transparent lg:grid lg:gap-1.5"
+  aria-label="Primary navigation"
+>
+
+  <a
+    class="nav-item group flex min-h-12 shrink-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold leading-none no-underline transition duration-150 hover:bg-pal-surface-2 hover:text-pal-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm lg:leading-normal {% if active == 'feed' %}nav-item-active bg-pal-surface text-pal-text shadow-pal{% endif %}"
+    href="{% url 'posts:feed' %}"
+    {% if active == 'feed' %}aria-current="page"{% endif %}
+  >
+    <svg class="h-5 w-5 shrink-0 lg:h-[1.35rem] lg:w-[1.35rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m3 10.5 9-7 9 7"/>
+      <path d="M5.5 9.5V20h13V9.5"/>
+      <path d="M9.5 20v-6h5v6"/>
+    </svg>
+    <span>Home</span>
+  </a>
+
+  <a
+    class="nav-item group flex min-h-12 shrink-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold leading-none no-underline transition duration-150 hover:bg-pal-surface-2 hover:text-pal-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm lg:leading-normal {% if active == 'search' %}nav-item-active bg-pal-surface text-pal-text shadow-pal{% endif %}"
+    href="{% url 'search:search' %}"
+    {% if active == 'search' %}aria-current="page"{% endif %}
+  >
+    <svg class="h-5 w-5 shrink-0 lg:h-[1.35rem] lg:w-[1.35rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+      <circle cx="10.5" cy="10.5" r="6.5"/>
+      <path d="m16 16 4 4"/>
+    </svg>
+    <span>Search</span>
+  </a>
+
+  <a
+    class="nav-item group flex min-h-12 shrink-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold leading-none no-underline transition duration-150 hover:bg-pal-surface-2 hover:text-pal-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm lg:leading-normal {% if active == 'inbox' %}nav-item-active bg-pal-surface text-pal-text shadow-pal{% endif %}"
+    href="{% url 'messaging:inbox' %}"
+    {% if active == 'inbox' %}aria-current="page"{% endif %}
+  >
+    <svg class="h-5 w-5 shrink-0 lg:h-[1.35rem] lg:w-[1.35rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="3"/>
+      <path d="m4 7 8 6 8-6"/>
+    </svg>
+    <span>Inbox</span>
+  </a>
+
+  <a
+    class="nav-item group flex min-h-12 shrink-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold leading-none no-underline transition duration-150 hover:bg-pal-surface-2 hover:text-pal-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm lg:leading-normal {% if active == 'saved' %}nav-item-active bg-pal-surface text-pal-text shadow-pal{% endif %}"
+    href="{% url 'posts:saved' %}"
+    {% if active == 'saved' %}aria-current="page"{% endif %}
+  >
+    <svg class="h-5 w-5 shrink-0 lg:h-[1.35rem] lg:w-[1.35rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M6 20V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v15l-6-4-6 4Z"/>
+    </svg>
+    <span>Saved</span>
+  </a>
+
+  <a
+    class="nav-item group flex min-h-12 shrink-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold leading-none no-underline transition duration-150 hover:bg-pal-surface-2 hover:text-pal-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm lg:leading-normal {% if active == 'assistant' %}nav-item-active bg-pal-surface text-pal-text shadow-pal{% endif %}"
+    href="{% url 'integrations:assistant' %}"
+    {% if active == 'assistant' %}aria-current="page"{% endif %}
+  >
+    <svg class="h-5 w-5 shrink-0 lg:h-[1.35rem] lg:w-[1.35rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3v3"/>
+      <path d="M12 18v3"/>
+      <path d="m4.93 4.93 2.12 2.12"/>
+      <path d="m16.95 16.95 2.12 2.12"/>
+      <path d="M3 12h3"/>
+      <path d="M18 12h3"/>
+      <path d="m4.93 19.07 2.12-2.12"/>
+      <path d="m16.95 7.05 2.12-2.12"/>
+      <circle cx="12" cy="12" r="4"/>
+    </svg>
+    <span>Assistant</span>
+  </a>
+
   {% if current_user %}
-    <a class="nav-item {% if active == 'profile' %}nav-item-active{% endif %}"
-       href="{% url 'accounts:user-profile' current_user.username %}">Profile</a>
-    <a class="nav-item {% if active == 'settings' %}nav-item-active{% endif %}" href="{% url 'accounts:settings' %}">Settings</a>
+
+    <a
+      class="nav-item group flex min-h-12 shrink-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold leading-none no-underline transition duration-150 hover:bg-pal-surface-2 hover:text-pal-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm lg:leading-normal {% if active == 'profile' %}nav-item-active bg-pal-surface text-pal-text shadow-pal{% endif %}"
+      href="{% url 'accounts:user-profile' current_user.username %}"
+      {% if active == 'profile' %}aria-current="page"{% endif %}
+    >
+      <svg class="h-5 w-5 shrink-0 lg:h-[1.35rem] lg:w-[1.35rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="8" r="3.5"/>
+        <path d="M5 20c.9-3.1 3.3-5 7-5s6.1 1.9 7 5"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+
+    <a
+      class="nav-item group flex min-h-12 shrink-0 flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold leading-none no-underline transition duration-150 hover:bg-pal-surface-2 hover:text-pal-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2.5 lg:text-sm lg:leading-normal {% if active == 'settings' %}nav-item-active bg-pal-surface text-pal-text shadow-pal{% endif %}"
+      href="{% url 'accounts:settings' %}"
+      {% if active == 'settings' %}aria-current="page"{% endif %}
+    >
+      <svg class="h-5 w-5 shrink-0 lg:h-[1.35rem] lg:w-[1.35rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1h-2.6v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1A1.7 1.7 0 0 0 8 15a1.7 1.7 0 0 0-1.5-1H6.4v-2.6h.1A1.7 1.7 0 0 0 8 10a1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.1H15v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.5 1h.1v2.6h-.1a1.7 1.7 0 0 0-1.5 1Z"/>
+      </svg>
+      <span>Settings</span>
+    </a>
+
   {% endif %}
 
-  <a class="btn btn-primary nav-cta" href="{% url 'posts:post-create' %}">New post</a>
+  <a
+    class="btn btn-primary nav-cta fixed bottom-20 right-4 z-50 inline-flex h-12 w-12 items-center justify-center rounded-full p-0 text-xl shadow-lg lg:static lg:z-auto lg:mt-3 lg:h-auto lg:w-full lg:rounded-xl lg:px-4 lg:py-3 lg:text-sm"
+    href="{% url 'posts:post-create' %}"
+    aria-label="Create a new post"
+  >
+    <span class="lg:hidden" aria-hidden="true">+</span>
+    <span class="hidden lg:inline">New post</span>
+  </a>
+
 </nav>
+

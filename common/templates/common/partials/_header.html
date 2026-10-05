@@ -1,33 +1,40 @@
 ﻿{% load common_static %}
 
-<header class="topbar border-pal-border">
-  <div class="topbar-inner">
+<header class="topbar border-b border-pal-border bg-pal-surface/95 backdrop-blur-xl">
 
+  <div class="topbar-inner mx-auto flex min-h-[72px] w-full max-w-[1440px] items-center gap-3 px-4 sm:px-5 lg:min-h-[76px] lg:gap-5 lg:px-6 xl:gap-6">
+
+    <!-- Brand -->
     <a
-      class="brand group"
+      class="brand group flex shrink-0 items-center gap-2 no-underline lg:w-[220px] xl:w-[240px]"
       href="{% url 'posts:feed' %}"
       aria-label="PalShare home"
     >
       <img
-        class="brand-mark transition-transform duration-200 group-hover:scale-105"
+        class="brand-mark h-10 w-10 shrink-0 object-contain transition-transform duration-200 group-hover:scale-105 sm:h-11 sm:w-11"
         src="{% versioned_static 'common/images/logo_final.png' %}"
         alt=""
         width="44"
         height="44"
       >
-      <span class="brand-wordmark">
-        Pal<span>Share</span>
+
+      <span class="brand-wordmark text-[1.45rem] font-extrabold tracking-[-0.04em] text-pal-text sm:text-[1.55rem]">
+        Pal<span class="text-pal-accent">Share</span>
       </span>
     </a>
 
+    <!-- Desktop / tablet search -->
     <form
-      class="searchbar topbar-search"
+      class="searchbar topbar-search relative hidden min-w-0 max-w-[620px] flex-1 md:flex"
       action="{% url 'search:search' %}"
       method="get"
       role="search"
       aria-label="Search PalShare"
     >
-      <label class="visually-hidden" for="q">
+      <label
+        class="sr-only"
+        for="q"
+      >
         Search people, posts, or tags
       </label>
 
@@ -38,14 +45,16 @@
         placeholder="Search people, posts, tags"
         value="{{ request.GET.q|default:'' }}"
         autocomplete="off"
+        class="h-11 w-full rounded-xl border border-pal-border bg-pal-bg px-4 pl-11 text-sm text-pal-text outline-none transition duration-150 placeholder:text-pal-muted focus:border-pal-accent focus:ring-2 focus:ring-pal-accent/15"
       >
 
       <button
-        class="topbar-search-submit"
+        class="topbar-search-submit absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-pal-muted transition duration-150 hover:bg-pal-surface-2 hover:text-pal-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent"
         type="submit"
         aria-label="Search"
       >
         <svg
+          class="h-5 w-5"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -59,11 +68,36 @@
       </button>
     </form>
 
-    <nav class="topbar-actions" aria-label="Account navigation">
+    <!-- Mobile search -->
+    <a
+      class="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-pal-text transition duration-150 hover:bg-pal-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent md:hidden"
+      href="{% url 'search:search' %}"
+      aria-label="Search"
+      title="Search"
+    >
+      <svg
+        class="h-5 w-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <circle cx="10.5" cy="10.5" r="6.5"/>
+        <path d="m16 16 4 4"/>
+      </svg>
+    </a>
 
-      <details class="theme-menu">
+    <!-- Account actions -->
+    <nav
+      class="topbar-actions flex shrink-0 items-center gap-1 sm:gap-2"
+      aria-label="Account navigation"
+    >
+
+      <details class="theme-menu relative">
         <summary
-          class="topbar-icon cursor-pointer select-none transition-colors duration-150"
+          class="topbar-icon flex h-10 w-10 cursor-pointer select-none items-center justify-center rounded-xl text-base text-pal-text transition duration-150 hover:bg-pal-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent"
           aria-label="Choose theme"
           title="Choose theme"
         >
@@ -71,11 +105,13 @@
           <span class="sr-only">Theme</span>
         </summary>
 
-        <div class="theme-menu-panel">
-          <span class="theme-menu-label">Appearance</span>
+        <div class="theme-menu-panel absolute right-0 top-12 z-50 w-48 rounded-2xl border border-pal-border bg-pal-surface p-2 shadow-xl">
+          <span class="theme-menu-label block px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-pal-muted">
+            Appearance
+          </span>
 
           <button
-            class="theme-option"
+            class="theme-option flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition hover:bg-pal-surface-2"
             data-theme-option="system"
             role="menuitemradio"
             aria-checked="false"
@@ -85,7 +121,7 @@
           </button>
 
           <button
-            class="theme-option"
+            class="theme-option flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition hover:bg-pal-surface-2"
             data-theme-option="light"
             role="menuitemradio"
             aria-checked="false"
@@ -95,7 +131,7 @@
           </button>
 
           <button
-            class="theme-option"
+            class="theme-option flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition hover:bg-pal-surface-2"
             data-theme-option="dark"
             role="menuitemradio"
             aria-checked="false"
@@ -105,7 +141,7 @@
           </button>
 
           <span
-            class="theme-menu-label"
+            class="theme-menu-label mt-1 block border-t border-pal-border px-3 pb-1 pt-2 text-xs text-pal-muted"
             data-theme-current-label
             aria-live="polite"
           >
@@ -116,8 +152,9 @@
 
       {% if current_user %}
 
+        <!-- Inbox: desktop header shortcut -->
         <a
-          class="topbar-icon"
+          class="topbar-icon hidden h-10 w-10 items-center justify-center rounded-xl text-pal-text transition duration-150 hover:bg-pal-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex"
           href="{% url 'messaging:inbox' %}"
           aria-label="Inbox"
           title="Inbox"
@@ -126,6 +163,7 @@
           {% endif %}
         >
           <svg
+            class="h-5 w-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -139,8 +177,9 @@
           </svg>
         </a>
 
+        <!-- Saved: desktop header shortcut -->
         <a
-          class="topbar-icon"
+          class="topbar-icon hidden h-10 w-10 items-center justify-center rounded-xl text-pal-text transition duration-150 hover:bg-pal-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent lg:flex"
           href="{% url 'posts:saved' %}"
           aria-label="Saved posts"
           title="Saved posts"
@@ -149,6 +188,7 @@
           {% endif %}
         >
           <svg
+            class="h-5 w-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -161,21 +201,22 @@
           </svg>
         </a>
 
+        <!-- Profile -->
         <a
-          class="topbar-profile"
+          class="topbar-profile group flex items-center gap-2 rounded-xl px-1.5 py-1.5 transition duration-150 hover:bg-pal-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pal-accent sm:gap-3 sm:px-2"
           href="{% url 'accounts:user-profile' current_user.username %}"
           aria-label="Your profile: {{ current_user.name|default:current_user.username }}"
         >
-          <span class="avatar topbar-avatar" aria-hidden="true">
+          <span class="avatar topbar-avatar flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-pal-accent/10 text-pal-accent">
             {% include "common/partials/_avatar.html" with who=current_user %}
           </span>
 
-          <span class="topbar-profile-text">
-            <span class="topbar-profile-name">
+          <span class="topbar-profile-text hidden min-w-0 sm:block">
+            <span class="topbar-profile-name block max-w-28 truncate text-sm font-bold leading-tight text-pal-text">
               {{ current_user.name|default:current_user.username }}
             </span>
 
-            <span class="topbar-profile-handle">
+            <span class="topbar-profile-handle block max-w-28 truncate text-xs leading-tight text-pal-muted">
               @{{ current_user.username }}
             </span>
           </span>
@@ -184,7 +225,7 @@
       {% else %}
 
         <a
-          class="btn btn-primary"
+          class="btn btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold"
           href="{% url 'accounts:login' %}"
         >
           Log in
@@ -195,4 +236,3 @@
     </nav>
   </div>
 </header>
-
